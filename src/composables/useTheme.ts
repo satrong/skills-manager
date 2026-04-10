@@ -1,11 +1,11 @@
 import { ref, computed, watch } from 'vue';
 
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type ThemeMode = 'auto' | 'light' | 'dark';
 
 const STORAGE_KEY = 'skills-manager-theme';
 
 const mode = ref<ThemeMode>(
-  (localStorage.getItem(STORAGE_KEY) as ThemeMode) || 'system'
+  (localStorage.getItem(STORAGE_KEY) as ThemeMode) || 'auto'
 );
 
 function getSystemTheme(): 'light' | 'dark' {
@@ -25,7 +25,7 @@ function startSystemListener() {
   if (mediaQuery) return;
   mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   mediaHandler = () => {
-    if (mode.value === 'system') {
+    if (mode.value === 'auto') {
       applyTheme(getSystemTheme());
     }
   };
@@ -41,13 +41,13 @@ function stopSystemListener() {
 }
 
 function resolveTheme(): 'light' | 'dark' {
-  return mode.value === 'system' ? getSystemTheme() : mode.value;
+  return mode.value === 'auto' ? getSystemTheme() : mode.value;
 }
 
 watch(mode, (newMode) => {
   localStorage.setItem(STORAGE_KEY, newMode);
   applyTheme(resolveTheme());
-  if (newMode === 'system') {
+  if (newMode === 'auto') {
     startSystemListener();
   } else {
     stopSystemListener();
@@ -55,7 +55,7 @@ watch(mode, (newMode) => {
 });
 
 // Initialize on first import
-if (mode.value === 'system') {
+if (mode.value === 'auto') {
   startSystemListener();
 }
 
@@ -66,9 +66,10 @@ applyTheme(resolveTheme());
 
 export function useTheme() {
   function cycleTheme() {
-    const order: ThemeMode[] = ['system', 'light', 'dark'];
-    const idx = order.indexOf(mode.value);
-    mode.value = order[(idx + 1) % order.length];
+    const current = resolveTheme();
+    const next = current === 'light' ? 'dark' : 'light';
+    const system = getSystemTheme();
+    mode.value = next === system ? 'auto' : next;
   }
 
   return {

@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import { useTheme } from '../composables/useTheme';
-import { Sun, Moon, Monitor } from 'lucide-vue-next';
+import { Sun, Moon } from 'lucide-vue-next';
 
-const { mode, cycleTheme } = useTheme();
+const { resolvedTheme, cycleTheme } = useTheme();
 
 const themeIcon = {
-  system: Monitor,
   light: Sun,
   dark: Moon,
 };
 
 const themeTitle = {
-  system: '跟随系统',
   light: '亮色模式',
   dark: '暗色模式',
 };
@@ -32,9 +30,9 @@ const themeTitle = {
       <button
         class="theme-btn"
         @click="cycleTheme"
-        :title="themeTitle[mode]"
+        :title="themeTitle[resolvedTheme]"
       >
-        <component :is="themeIcon[mode]" :size="18" />
+        <component :is="themeIcon[resolvedTheme]" :size="18" />
       </button>
     </div>
   </div>
@@ -62,7 +60,7 @@ const themeTitle = {
   width: 36px;
   height: 36px;
   display: flex;
-  color: var(--primary-hover);
+  color: #FF7A27;
   align-items: center;
   justify-content: center;
 }
