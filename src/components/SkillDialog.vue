@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import type { Skill, InstallType, ToolType } from '../types';
-import { TOOL_LABELS } from '../utils/toolPaths';
+import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
 
 const props = defineProps<{
@@ -28,6 +28,11 @@ const tools: { value: ToolType; label: string }[] = (
   Object.entries(TOOL_LABELS) as [ToolType, string][]
 ).map(([value, label]) => ({ value, label }));
 
+const projectToolDir = computed(() => {
+  if (toolType.value === 'custom') return '.skills';
+  return PROJECT_TOOL_DIRS[toolType.value] ?? '.skills';
+});
+
 watch(toolType, async (tool) => {
   if (installType.value === 'global') {
     targetPath.value = await getToolPath(tool);
@@ -45,7 +50,7 @@ watch(installType, async (type) => {
 const previewPath = computed(() => {
   if (installType.value === 'project') {
     const base = projectPath.value || '<项目路径>';
-    return `${base}\\.skills\\${props.skill.id}`;
+    return `${base}\\${projectToolDir.value}\\${props.skill.id}`;
   }
   const base = targetPath.value || '<工具技能路径>';
   return `${base}\\${props.skill.id}`;
@@ -112,18 +117,21 @@ async function handleOverwrite() {
           </label>
           <label class="radio">
             <input type="radio" v-model="installType" value="project" />
-            项目安装（.skills 目录）
+            项目安装（工具项目目录）
           </label>
         </div>
       </div>
 
-      <div v-if="installType === 'global'" class="section">
+      <div class="section">
         <label>目标工具</label>
         <select v-model="toolType">
           <option v-for="tool in tools" :key="tool.value" :value="tool.value">
             {{ tool.label }}
           </option>
         </select>
+      </div>
+
+      <div v-if="installType === 'global'" class="section">
         <label class="path-label">技能目录路径</label>
         <input v-model="targetPath" type="text" placeholder="工具技能目录路径" />
         <label class="checkbox">

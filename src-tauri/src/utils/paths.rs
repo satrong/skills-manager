@@ -51,6 +51,19 @@ pub fn default_tool_path(tool: &str) -> Option<String> {
     expand_path(path).ok()
 }
 
+/// 获取工具在项目中的配置目录（相对于项目根目录）
+pub fn project_tool_dir(tool: &str) -> Option<&str> {
+    match tool {
+        "claude-code" => Some(".claude"),
+        "cursor" => Some(".cursor\\rules"),
+        "codex" => Some(".codex"),
+        "opencode" => Some(".opencode"),
+        "qoder" => Some(".qoder\\rules"),
+        "kilo" => Some(".kilocode\\rules"),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
