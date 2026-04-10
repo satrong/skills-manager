@@ -31,7 +31,7 @@ pub async fn install_skill(
 
     let install_dir = if install_type == "project" {
         let project_dir = paths::project_tool_dir(&tool_type)
-            .unwrap_or(".skills");
+            .unwrap_or_else(|| ".skills".to_string());
         PathBuf::from(&target_path).join(project_dir)
     } else {
         if target_path.is_empty() {

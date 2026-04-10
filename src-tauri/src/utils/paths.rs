@@ -30,38 +30,41 @@ pub fn repo_dir_name(url: &str) -> Result<String, String> {
     Ok(format!("{}-{}", user_name, repo_name))
 }
 
-/// 展开 %USERPROFILE% 到实际路径
+/// 展开 %USERPROFILE% 到实际路径，并规范化路径分隔符
 pub fn expand_path(path: &str) -> Result<String, String> {
     let home = dirs::home_dir()
         .ok_or_else(|| "无法获取用户主目录".to_string())?;
-    Ok(path.replace("%USERPROFILE%", &home.to_string_lossy()))
+    let expanded = path.replace("%USERPROFILE%", &home.to_string_lossy());
+    Ok(PathBuf::from(&expanded).to_string_lossy().to_string())
 }
 
 /// 获取工具默认技能目录
 pub fn default_tool_path(tool: &str) -> Option<String> {
+    let home = dirs::home_dir()?;
     let path = match tool {
-        "claude-code" => "%USERPROFILE%\\.claude\\skills",
-        "cursor" => "%USERPROFILE%\\.cursor\\skills",
-        "codex" => "%USERPROFILE%\\.codex\\skills",
-        "opencode" => "%USERPROFILE%\\.config\\opencode\\skills",
-        "qoder" => "%USERPROFILE%\\.qoder\\skills",
-        "kilo" => "%USERPROFILE%\\.kilocode\\skills",
+        "claude-code" => home.join(".claude").join("skills"),
+        "cursor" => home.join(".cursor").join("skills"),
+        "codex" => home.join(".codex").join("skills"),
+        "opencode" => home.join(".config").join("opencode").join("skills"),
+        "qoder" => home.join(".qoder").join("skills"),
+        "kilo" => home.join(".kilocode").join("skills"),
         _ => return None,
     };
-    expand_path(path).ok()
+    Some(path.to_string_lossy().to_string())
 }
 
 /// 获取工具在项目中的配置目录（相对于项目根目录）
-pub fn project_tool_dir(tool: &str) -> Option<&str> {
-    match tool {
-        "claude-code" => Some(".claude"),
-        "cursor" => Some(".cursor\\rules"),
-        "codex" => Some(".codex"),
-        "opencode" => Some(".opencode"),
-        "qoder" => Some(".qoder\\rules"),
-        "kilo" => Some(".kilocode\\rules"),
-        _ => None,
-    }
+pub fn project_tool_dir(tool: &str) -> Option<String> {
+    let path = match tool {
+        "claude-code" => PathBuf::from(".claude"),
+        "cursor" => PathBuf::from(".cursor").join("rules"),
+        "codex" => PathBuf::from(".codex"),
+        "opencode" => PathBuf::from(".opencode"),
+        "qoder" => PathBuf::from(".qoder").join("rules"),
+        "kilo" => PathBuf::from(".kilocode").join("rules"),
+        _ => return None,
+    };
+    Some(path.to_string_lossy().to_string())
 }
 
 #[cfg(test)]

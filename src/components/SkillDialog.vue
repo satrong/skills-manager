@@ -30,7 +30,7 @@ const tools: { value: ToolType; label: string }[] = (
 
 const projectToolDir = computed(() => {
   if (toolType.value === 'custom') return '.skills';
-  return PROJECT_TOOL_DIRS[toolType.value] ?? '.skills';
+  return (PROJECT_TOOL_DIRS[toolType.value] ?? '.skills').replace(/\\/g, pathSep);
 });
 
 watch(toolType, async (tool) => {
@@ -47,13 +47,16 @@ watch(installType, async (type) => {
   }
 });
 
+const isWindows = navigator.userAgent.includes('Windows');
+const pathSep = isWindows ? '\\' : '/';
+
 const previewPath = computed(() => {
   if (installType.value === 'project') {
     const base = projectPath.value || '<项目路径>';
-    return `${base}\\${projectToolDir.value}\\${props.skill.id}`;
+    return [base, projectToolDir.value, props.skill.id].join(pathSep);
   }
   const base = targetPath.value || '<工具技能路径>';
-  return `${base}\\${props.skill.id}`;
+  return [base, props.skill.id].join(pathSep);
 });
 
 async function handleInstall() {
@@ -145,7 +148,7 @@ async function handleOverwrite() {
         <input
           v-model="projectPath"
           type="text"
-          placeholder="例: D:\MyProject"
+          :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
         />
       </div>
 
