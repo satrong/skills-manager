@@ -8,6 +8,7 @@ use commands::{config, install, repo, skill};
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             // 配置
             config::load_config,

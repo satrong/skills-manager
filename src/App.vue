@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
+import { ask } from '@tauri-apps/plugin-dialog';
 import type { Skill } from './types';
 import { useRepos } from './composables/useRepos';
 import { useSkills } from './composables/useSkills';
@@ -68,7 +69,13 @@ async function handleUpdateRepo(url: string) {
 }
 
 async function handleRemoveRepo(url: string) {
-  if (!confirm('确定删除该仓库？本地克隆的文件也会被删除。')) return;
+  const confirmed = await ask('确定删除该仓库？本地克隆的文件也会被删除。', {
+    title: '删除仓库',
+    kind: 'warning',
+    okLabel: '删除',
+    cancelLabel: '取消',
+  });
+  if (!confirmed) return;
   try {
     await removeRepo(url);
     clearCache(url);
