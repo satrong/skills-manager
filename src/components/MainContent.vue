@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { Repo, Skill } from '../types';
 import { useSkills } from '../composables/useSkills';
 import { useRepos } from '../composables/useRepos';
+import { parseRepoUrl } from '../utils/repo';
 import SkillCard from './SkillCard.vue';
 import { RefreshCw, Loader2, Inbox } from 'lucide-vue-next';
 
@@ -22,6 +23,11 @@ const skills = ref<Skill[]>([]);
 const loading = ref(false);
 
 const currentRepo = ref<Repo | null>(null);
+
+const repoMeta = computed(() => {
+  if (!currentRepo.value) return null;
+  return parseRepoUrl(currentRepo.value.url);
+});
 
 watch(
   () => props.repoUrl,
@@ -61,8 +67,8 @@ watch(
     <template v-else-if="currentRepo">
       <div class="content-header">
         <div class="header-info">
-          <h2 class="repo-title">{{ currentRepo.name }}</h2>
-          <span class="repo-url">{{ currentRepo.url }}</span>
+          <h2 class="repo-title">{{ repoMeta?.owner || currentRepo.name }}</h2>
+          <span class="repo-subtitle">{{ repoMeta?.name || currentRepo.url }}</span>
         </div>
         <button
           class="update-btn"
@@ -114,14 +120,11 @@ watch(
   font-weight: 600;
   color: var(--text-primary);
 }
-.repo-url {
-  font-size: 0.75rem;
+.repo-subtitle {
+  font-size: 0.8rem;
   color: var(--text-muted);
   display: block;
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .update-btn {
   display: flex;

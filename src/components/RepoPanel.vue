@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRepos } from '../composables/useRepos';
+import { parseRepoUrl } from '../utils/repo';
 import { RefreshCw, Trash2, Plus, Loader2 } from 'lucide-vue-next';
 
 defineProps<{
@@ -17,7 +18,7 @@ const emit = defineEmits<{
 
 const { repos, updateAllLoading, isUpdateLoading, addRepoUrl } = useRepos();
 
-const repoList = computed(() => repos.value);
+const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl(r.url) })));
 </script>
 
 <template>
@@ -43,7 +44,8 @@ const repoList = computed(() => repos.value);
         @click="emit('select', repo.url)"
       >
         <div class="repo-info">
-          <div class="repo-name">{{ repo.name }}</div>
+          <div class="repo-name">{{ repo.meta.owner || repo.name }}</div>
+          <div class="repo-subtitle">{{ repo.meta.name }}</div>
           <div class="repo-skill-count">{{ addRepoUrl === repo.url ? '克隆中...' : (repo.lastUpdate ? '已同步' : '新仓库') }}</div>
         </div>
         <div class="repo-actions" @click.stop>
@@ -142,6 +144,11 @@ const repoList = computed(() => repos.value);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.repo-subtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 .repo-skill-count {
   font-size: 0.7rem;

@@ -50,6 +50,7 @@ function handleAddRepo(url: string) {
 async function handleUpdateAll() {
   try {
     const results = await updateAllRepos();
+    await loadRepos();
     addToast(results.join('\n') || '所有仓库已更新', 'success');
   } catch (e) {
     // error already handled by watch
@@ -59,6 +60,7 @@ async function handleUpdateAll() {
 async function handleUpdateRepo(url: string) {
   try {
     const result = await updateRepo(url);
+    await loadRepos();
     addToast(result || '更新完成', 'success');
   } catch (e) {
     // error already handled by watch

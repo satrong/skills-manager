@@ -2,14 +2,18 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Repo {
     pub url: String,
+    #[serde(alias = "local_path")]
     pub local_path: PathBuf,
     pub name: String,
+    #[serde(alias = "last_update")]
     pub last_update: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Skill {
     pub id: String,
     pub name: String,
