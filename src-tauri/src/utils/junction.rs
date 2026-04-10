@@ -1,5 +1,4 @@
 use std::path::Path;
-use std::process::Command;
 
 pub enum JunctionStatus {
     NotExists,
@@ -7,7 +6,7 @@ pub enum JunctionStatus {
     IsDirectory,
 }
 
-/// 检查路径的 Junction 状态
+/// 检查路径的 Junction/Symlink 状态
 pub fn check_status(path: &Path) -> JunctionStatus {
     if !path.exists() {
         if is_junction(path) {
@@ -22,34 +21,21 @@ pub fn check_status(path: &Path) -> JunctionStatus {
     }
 }
 
-/// 检查路径是否是 Junction 链接
+/// 检查路径是否是 Junction/Symlink 链接
 fn is_junction(path: &Path) -> bool {
-    use std::os::windows::fs::MetadataExt;
     if let Ok(metadata) = std::fs::symlink_metadata(path) {
-        let attrs = metadata.file_attributes();
-        return (attrs & 0x400) != 0 && metadata.is_dir();
+        return metadata.file_type().is_symlink() && metadata.is_dir();
     }
     false
 }
 
-/// 删除 Junction 链接（不删除目标）
+/// 删除 Junction/Symlink 链接（不删除目标）
 pub fn remove_junction(path: &Path) -> Result<(), String> {
-    let output = Command::new("cmd")
-        .args(["/C", "rmdir", &path.to_string_lossy()])
-        .output()
-        .map_err(|e| format!("执行 rmdir 失败: {}", e))?;
-
-    if output.status.success() {
-        Ok(())
-    } else {
-        Err(format!(
-            "删除 junction 失败: {}",
-            String::from_utf8_lossy(&output.stderr)
-        ))
-    }
+    std::fs::remove_dir(path)
+        .map_err(|e| format!("删除链接失败: {}", e))
 }
 
-/// 创建 Junction 链接
+/// 创建 Junction/Symlink 链接
 pub fn create_junction(link_path: &Path, target_path: &Path) -> Result<(), String> {
     if !target_path.exists() {
         return Err(format!("源目录不存在: {}", target_path.display()));
@@ -60,25 +46,32 @@ pub fn create_junction(link_path: &Path, target_path: &Path) -> Result<(), Strin
             .map_err(|e| format!("创建父目录失败: {}", e))?;
     }
 
-    let output = Command::new("powershell")
-        .args([
-            "-NoProfile",
-            "-Command",
-            &format!(
-                "New-Item -ItemType Junction -Path '{}' -Target '{}'",
-                link_path.to_string_lossy(),
-                target_path.to_string_lossy()
-            ),
-        ])
-        .output()
-        .map_err(|e| format!("执行 PowerShell 失败: {}", e))?;
+    #[cfg(windows)]
+    {
+        let output = std::process::Command::new("cmd")
+            .args([
+                "/C",
+                "mklink",
+                "/J",
+                &link_path.to_string_lossy(),
+                &target_path.to_string_lossy(),
+            ])
+            .output()
+            .map_err(|e| format!("执行 mklink 失败: {}", e))?;
 
-    if output.status.success() {
-        Ok(())
-    } else {
-        Err(format!(
-            "创建 Junction 失败: {}",
-            String::from_utf8_lossy(&output.stderr)
-        ))
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(format!(
+                "创建 Junction 失败: {}",
+                String::from_utf8_lossy(&output.stderr)
+            ))
+        }
+    }
+
+    #[cfg(not(windows))]
+    {
+        std::os::unix::fs::symlink(target_path, link_path)
+            .map_err(|e| format!("创建符号链接失败: {}", e))
     }
 }

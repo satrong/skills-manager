@@ -74,6 +74,6 @@ pub async fn uninstall_skill(link_path: String) -> Result<(), String> {
     match junction::check_status(&path) {
         junction::JunctionStatus::IsJunction => junction::remove_junction(&path),
         junction::JunctionStatus::NotExists => Err("链接不存在".to_string()),
-        junction::JunctionStatus::IsDirectory => Err("该路径是普通目录，不是 Junction 链接".to_string()),
+        junction::JunctionStatus::IsDirectory => Err("该路径是普通目录，不是链接".to_string()),
     }
 }
