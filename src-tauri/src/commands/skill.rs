@@ -75,8 +75,8 @@ fn find_skill_md_files(dir: &Path) -> Vec<std::path::PathBuf> {
         let name = entry.file_name();
         let name_str = name.to_string_lossy();
 
-        // 跳过隐藏目录
-        if name_str.starts_with('.') {
+        // 跳过 .git 目录
+        if name_str == ".git" {
             continue;
         }
 
