@@ -1,0 +1,76 @@
+/* src/assets/theme.css */
+:root,
+.theme-light {
+  --bg-app: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-sunken: #f1f5f9;
+  --bg-surface-hover: #f1f5f9;
+  --bg-scrim: rgba(0, 0, 0, 0.5);
+  --border: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --primary-light: #fffbeb;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-light: #fef2f2;
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+}
+
+.theme-dark {
+  --bg-app: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-sunken: #020617;
+  --bg-surface-hover: #334155;
+  --bg-scrim: rgba(0, 0, 0, 0.7);
+  --border: #334155;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --primary-light: #451a03;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-light: #450a0a;
+  --success: #22c55e;
+  --success-light: #052e16;
+}
+
+/* Global resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar (WebKit - Tauri WebView) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

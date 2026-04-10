@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "skills-manager",
-        "width": 800,
-        "height": 600
+        "title": "Skills Manager",
+        "width": 1100,
+        "height": 750,
+        "minWidth": 800,
+        "minHeight": 500
       }
     ],
     "security": {
