@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Skill } from '../types';
-import { Download } from 'lucide-vue-next';
 
 const props = defineProps<{
   skill: Skill;
@@ -24,7 +23,6 @@ const emit = defineEmits<{
     </div>
     <div class="card-footer">
       <button class="install-btn" @click.stop="emit('install', props.skill)">
-        <Download :size="14" />
         <span>安装</span>
       </button>
     </div>
@@ -89,15 +87,17 @@ const emit = defineEmits<{
   align-items: center;
   gap: 4px;
   padding: 5px 12px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.8rem;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
 .install-btn:hover {
-  background: var(--primary-hover);
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 </style>
