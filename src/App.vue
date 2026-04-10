@@ -40,14 +40,11 @@ onMounted(async () => {
   }
 });
 
-async function handleAddRepo(url: string) {
-  try {
-    await addRepo(url);
-    showAddRepo.value = false;
-    addToast('仓库添加成功', 'success');
-  } catch (e) {
-    // error already handled by watch
-  }
+function handleAddRepo(url: string) {
+  showAddRepo.value = false;
+  addRepo(url)
+    .then(() => addToast('仓库添加成功', 'success'))
+    .catch(() => { /* error already handled by watch */ });
 }
 
 async function handleUpdateAll() {

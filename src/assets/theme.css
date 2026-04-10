@@ -1,10 +1,10 @@
 /* src/assets/theme.css */
 :root,
 .theme-light {
-  --bg-app: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-surface-sunken: #f1f5f9;
-  --bg-surface-hover: #f1f5f9;
+  --bg-app: #f5f7fa;
+  --bg-surface: #f5f7fa;
+  --bg-surface-sunken: #f0f3f7;
+  --bg-surface-hover: #eef1f5;
   --bg-scrim: rgba(0, 0, 0, 0.5);
   --border: #e2e8f0;
   --text-primary: #1e293b;
@@ -21,10 +21,10 @@
 }
 
 .theme-dark {
-  --bg-app: #0f172a;
-  --bg-surface: #1e293b;
-  --bg-surface-sunken: #020617;
-  --bg-surface-hover: #334155;
+  --bg-app: #111827;
+  --bg-surface: #111827;
+  --bg-surface-sunken: #0d1321;
+  --bg-surface-hover: #1e2a3f;
   --bg-scrim: rgba(0, 0, 0, 0.7);
   --border: #334155;
   --text-primary: #e2e8f0;

@@ -15,7 +15,7 @@ const emit = defineEmits<{
   updateAll: [];
 }>();
 
-const { repos, updateAllLoading, isUpdateLoading } = useRepos();
+const { repos, updateAllLoading, isUpdateLoading, addRepoUrl } = useRepos();
 
 const repoList = computed(() => repos.value);
 </script>
@@ -39,30 +39,35 @@ const repoList = computed(() => repos.value);
       <div
         v-for="repo in repoList"
         :key="repo.url"
-        :class="['repo-item', { selected: repo.url === selectedRepoUrl }]"
+        :class="['repo-item', { selected: repo.url === selectedRepoUrl, 'is-cloning': addRepoUrl === repo.url }]"
         @click="emit('select', repo.url)"
       >
         <div class="repo-info">
           <div class="repo-name">{{ repo.name }}</div>
-          <div class="repo-skill-count">{{ repo.lastUpdate ? '已同步' : '新仓库' }}</div>
+          <div class="repo-skill-count">{{ addRepoUrl === repo.url ? '克隆中...' : (repo.lastUpdate ? '已同步' : '新仓库') }}</div>
         </div>
         <div class="repo-actions" @click.stop>
-          <button
-            class="icon-btn-sm"
-            @click="emit('update', repo.url)"
-            :disabled="isUpdateLoading(repo.url)"
-            title="更新"
-          >
-            <Loader2 v-if="isUpdateLoading(repo.url)" :size="13" class="spin" />
-            <RefreshCw v-else :size="13" />
-          </button>
-          <button
-            class="icon-btn-sm danger"
-            @click="emit('remove', repo.url)"
-            title="删除"
-          >
-            <Trash2 :size="13" />
-          </button>
+          <template v-if="addRepoUrl === repo.url">
+            <Loader2 :size="13" class="spin repo-loading" />
+          </template>
+          <template v-else>
+            <button
+              class="icon-btn-sm"
+              @click="emit('update', repo.url)"
+              :disabled="isUpdateLoading(repo.url)"
+              title="更新"
+            >
+              <Loader2 v-if="isUpdateLoading(repo.url)" :size="13" class="spin" />
+              <RefreshCw v-else :size="13" />
+            </button>
+            <button
+              class="icon-btn-sm danger"
+              @click="emit('remove', repo.url)"
+              title="删除"
+            >
+              <Trash2 :size="13" />
+            </button>
+          </template>
         </div>
       </div>
 
@@ -145,11 +150,15 @@ const repoList = computed(() => repos.value);
 }
 .repo-actions {
   display: flex;
+  align-items: center;
   gap: 2px;
   opacity: 0;
   transition: opacity 0.15s;
 }
 .repo-item:hover .repo-actions {
+  opacity: 1;
+}
+.repo-item.is-cloning .repo-actions {
   opacity: 1;
 }
 .empty {

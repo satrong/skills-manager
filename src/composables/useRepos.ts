@@ -4,11 +4,16 @@ import type { Repo } from '../types';
 
 const repos = ref<Repo[]>([]);
 const reposLoading = ref(false);
-const addRepoLoading = ref(false);
+const addRepoUrl = ref<string | null>(null);
 const updateLoading = ref<Record<string, boolean>>({});
 const updateAllLoading = ref(false);
 const removeRepoLoading = ref(false);
 const error = ref<string | null>(null);
+
+function extractRepoName(url: string): string {
+  const parts = url.replace(/\/+$/, '').split('/');
+  return parts[parts.length - 1] || url;
+}
 
 const reposReadonly = computed(() => repos.value);
 
@@ -27,16 +32,32 @@ export function useRepos() {
   }
 
   async function addRepo(url: string): Promise<void> {
-    addRepoLoading.value = true;
+    addRepoUrl.value = url;
     error.value = null;
+
+    // Optimistically add placeholder to list
+    repos.value.push({
+      url,
+      localPath: '',
+      name: extractRepoName(url),
+      lastUpdate: '',
+      skills: [],
+    });
+
     try {
       const repo = await invoke<Repo>('add_repo', { url });
-      repos.value.push({ ...repo, skills: [] });
+      // Replace placeholder with real data
+      const index = repos.value.findIndex(r => r.url === url);
+      if (index !== -1) {
+        repos.value[index] = { ...repo, skills: [] };
+      }
     } catch (e) {
+      // Remove placeholder on error
+      repos.value = repos.value.filter(r => r.url !== url);
       error.value = String(e);
       throw e;
     } finally {
-      addRepoLoading.value = false;
+      addRepoUrl.value = null;
     }
   }
 
@@ -89,7 +110,7 @@ export function useRepos() {
   return {
     repos: reposReadonly,
     reposLoading: readonly(reposLoading),
-    addRepoLoading: readonly(addRepoLoading),
+    addRepoUrl: readonly(addRepoUrl),
     updateLoading: readonly(updateLoading),
     updateAllLoading: readonly(updateAllLoading),
     removeRepoLoading: readonly(removeRepoLoading),
