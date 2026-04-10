@@ -50,6 +50,8 @@ watch(installType, async (type) => {
 const isWindows = navigator.userAgent.includes('Windows');
 const pathSep = isWindows ? '\\' : '/';
 
+const isCustomTool = computed(() => toolType.value === 'custom');
+
 const previewPath = computed(() => {
   if (installType.value === 'project') {
     const base = projectPath.value || '<项目路径>';
@@ -136,7 +138,7 @@ async function handleOverwrite() {
 
       <div v-if="installType === 'global'" class="section">
         <label class="path-label">技能目录路径</label>
-        <input v-model="targetPath" type="text" placeholder="工具技能目录路径" />
+        <input v-model="targetPath" type="text" placeholder="工具技能目录路径" :disabled="!isCustomTool" />
         <label class="checkbox">
           <input type="checkbox" v-model="rememberPath" />
           记住此路径
@@ -222,6 +224,11 @@ select {
 select:focus, input[type="text"]:focus {
   border-color: var(--primary);
   outline: none;
+}
+input[type="text"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--bg-surface-sunken);
 }
 .checkbox { font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); }
 .preview {
