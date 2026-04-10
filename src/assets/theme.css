@@ -1,5 +1,7 @@
 /* src/assets/theme.css */
-:root,
+:root {
+  color-scheme: light;
+}
 .theme-light {
   --bg-app: #f5f7fa;
   --bg-surface: #f5f7fa;
@@ -21,6 +23,7 @@
 }
 
 .theme-dark {
+  color-scheme: dark;
   --bg-app: #111827;
   --bg-surface: #111827;
   --bg-surface-sunken: #0d1321;
