@@ -214,7 +214,8 @@ select:focus, input[type="text"]:focus {
 }
 .checkbox { font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); }
 .preview {
-  background: var(--primary-light);
+  background: var(--bg-surface-sunken);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px 14px;
   font-size: 0.85rem;
