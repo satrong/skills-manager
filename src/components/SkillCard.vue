@@ -19,6 +19,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   install: [skill: Skill];
   quickInstall: [skill: Skill, entry: QuickInstallEntry];
+  removeQuickInstallEntry: [entry: QuickInstallEntry];
   toggleDropdown: [];
 }>();
 
@@ -51,6 +52,11 @@ function handleToggleDropdown(e: Event) {
 function handleQuickInstall(entry: QuickInstallEntry) {
   emit('toggleDropdown');
   emit('quickInstall', props.skill, entry);
+}
+
+function handleRemoveEntry(entry: QuickInstallEntry, e: Event) {
+  e.stopPropagation();
+  emit('removeQuickInstallEntry', entry);
 }
 
 function pathDisplay(targetPath: string) {
@@ -97,8 +103,18 @@ function pathDisplay(targetPath: string) {
               class="dropdown-item"
               @click.stop="handleQuickInstall(entry)"
             >
-              <span class="item-label">{{ pathDisplay(entry.targetPath).title }}</span>
-              <span class="item-path">{{ pathDisplay(entry.targetPath).subtitle }}</span>
+              <div class="item-content">
+                <span class="item-label">{{ pathDisplay(entry.targetPath).title }}</span>
+                <span class="item-path">{{ pathDisplay(entry.targetPath).subtitle }}</span>
+              </div>
+              <button
+                v-if="entry.installType === 'project'"
+                class="item-delete-btn"
+                @click.stop="handleRemoveEntry(entry, $event)"
+                title="删除"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </button>
           </template>
         </div>
@@ -247,8 +263,8 @@ function pathDisplay(targetPath: string) {
 }
 .dropdown-item {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   padding: 8px 12px;
   border: none;
@@ -263,6 +279,13 @@ function pathDisplay(targetPath: string) {
 .dropdown-item:hover {
   background: var(--bg-surface-hover);
 }
+.item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
 .item-label {
   font-weight: 500;
   font-size: 0.8rem;
@@ -272,5 +295,26 @@ function pathDisplay(targetPath: string) {
   color: var(--text-secondary);
   word-break: break-all;
   line-height: 1.3;
+}
+.item-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.dropdown-item:hover .item-delete-btn {
+  opacity: 1;
+}
+.item-delete-btn:hover {
+  color: var(--danger);
+  background: var(--danger-light);
 }
 </style>

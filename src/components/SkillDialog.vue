@@ -100,6 +100,14 @@ function selectProjectPath(path: string) {
   showPathDropdown.value = false;
 }
 
+async function removeProjectPath(path: string, event: MouseEvent) {
+  event.stopPropagation();
+  try {
+    await invoke('remove_project_path', { path });
+    projectPaths.value = projectPaths.value.filter(p => p !== path);
+  } catch { /* ignore */ }
+}
+
 function onPathInputFocus() {
   if (filteredPaths.value.length > 0) {
     showPathDropdown.value = true;
@@ -236,7 +244,14 @@ async function selectFolder() {
                   class="path-dropdown-item"
                   @mousedown.prevent="selectProjectPath(p)"
                 >
-                  {{ p }}
+                  <span class="path-text">{{ p }}</span>
+                  <button
+                    class="path-delete-btn"
+                    @mousedown.prevent.stop="removeProjectPath(p, $event)"
+                    title="删除"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -362,10 +377,39 @@ input[type="text"]:disabled {
   cursor: pointer;
   word-break: break-all;
   transition: background 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 .path-dropdown-item:hover {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
+}
+.path-text {
+  flex: 1;
+  min-width: 0;
+}
+.path-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.path-dropdown-item:hover .path-delete-btn {
+  opacity: 1;
+}
+.path-delete-btn:hover {
+  color: var(--danger);
+  background: var(--danger-light);
 }
 .browse-btn {
   display: flex;

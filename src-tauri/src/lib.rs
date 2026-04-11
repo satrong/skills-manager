@@ -17,6 +17,7 @@ pub fn run() {
             config::set_tool_path,
             config::get_project_paths,
             config::add_project_path,
+            config::remove_project_path,
             config::get_default_tool_type,
             config::set_default_tool_type,
             // 仓库

@@ -112,6 +112,17 @@ watch(
 function onDocumentClick() {
   if (openDropdownId.value) openDropdownId.value = null;
 }
+
+async function removeQuickInstallEntry(entry: QuickInstallEntry) {
+  if (entry.installType === 'project') {
+    try {
+      await invoke('remove_project_path', { path: entry.targetPath });
+      if (configData.value) {
+        configData.value.projectPaths = configData.value.projectPaths.filter(p => p !== entry.targetPath);
+      }
+    } catch { /* ignore */ }
+  }
+}
 onMounted(() => document.addEventListener('click', onDocumentClick));
 onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 </script>
@@ -170,6 +181,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
           :open-dropdown="openDropdownId === skill.id"
           @install="emit('installSkill', $event)"
           @quick-install="(skill, entry) => emit('quickInstallSkill', skill, entry)"
+          @remove-quick-install-entry="removeQuickInstallEntry"
           @toggle-dropdown="openDropdownId = openDropdownId === skill.id ? null : skill.id"
         />
       </div>
