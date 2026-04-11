@@ -9,6 +9,8 @@
   --bg-surface-hover: #eef1f5;
   --bg-scrim: rgba(0, 0, 0, 0.5);
   --border: #e2e8f0;
+  --border-strong: #c0c8d4;
+  --bg-elevated: #ffffff;
   --text-primary: #475569;
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
@@ -30,6 +32,8 @@
   --bg-surface-hover: #1e2a3f;
   --bg-scrim: rgba(0, 0, 0, 0.7);
   --border: #334155;
+  --border-strong: #4b5e75;
+  --bg-elevated: #1e293b;
   --text-primary: #cbd5e1;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;

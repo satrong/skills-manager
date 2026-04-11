@@ -38,10 +38,17 @@ onMounted(async () => {
     }>('load_config');
     const entries: QuickInstallEntry[] = [];
     if (config.projectPaths?.length) {
+      const tool = defaultToolType.value;
+      entries.push({
+        label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
+        installType: 'project',
+        toolType: tool,
+        targetPath: '',
+        header: true,
+      });
       for (const p of config.projectPaths) {
-        const tool = defaultToolType.value;
         entries.push({
-          label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
+          label: '',
           installType: 'project',
           toolType: tool,
           targetPath: p,

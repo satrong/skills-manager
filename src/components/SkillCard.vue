@@ -7,6 +7,7 @@ export interface QuickInstallEntry {
   installType: 'global' | 'project';
   toolType: ToolType;
   targetPath: string;
+  header?: boolean;
 }
 
 const props = defineProps<{
@@ -60,15 +61,19 @@ function handleQuickInstall(entry: QuickInstallEntry) {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div v-if="openDropdown" class="install-dropdown">
-          <button
-            v-for="(entry, idx) in quickInstallEntries"
-            :key="idx"
-            class="dropdown-item"
-            @click.stop="handleQuickInstall(entry)"
-          >
-            <span class="item-label">{{ entry.label }}</span>
-            <span class="item-path">{{ entry.targetPath }}</span>
-          </button>
+          <template v-for="(entry, idx) in quickInstallEntries" :key="idx">
+            <div v-if="entry.header" class="dropdown-header">
+              <span class="item-label">{{ entry.label }}</span>
+            </div>
+            <button
+              v-else
+              class="dropdown-item"
+              @click.stop="handleQuickInstall(entry)"
+            >
+              <span class="item-label">{{ entry.label }}</span>
+              <span class="item-path">{{ entry.targetPath }}</span>
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -183,12 +188,24 @@ function handleQuickInstall(entry: QuickInstallEntry) {
   right: 0;
   width: max-content;
   max-width: 540px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
+  background: var(--bg-elevated, #fff);
+  border: 1px solid var(--border-strong, #c0c8d4);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   z-index: 50;
   overflow: hidden;
+}
+.dropdown-header {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: default;
+  user-select: none;
+}
+.dropdown-item + .dropdown-header,
+.dropdown-header + .dropdown-item {
+  border-top: 1px solid var(--border);
 }
 .dropdown-item {
   display: flex;
@@ -205,9 +222,6 @@ function handleQuickInstall(entry: QuickInstallEntry) {
   text-align: left;
   transition: background 0.1s;
 }
-.dropdown-item + .dropdown-item {
-  border-top: 1px solid var(--border);
-}
 .dropdown-item:hover {
   background: var(--bg-surface-hover);
 }
@@ -217,7 +231,7 @@ function handleQuickInstall(entry: QuickInstallEntry) {
 }
 .item-path {
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   word-break: break-all;
   line-height: 1.3;
 }
