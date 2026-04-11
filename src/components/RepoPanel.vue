@@ -44,7 +44,7 @@ const repoList = computed(() => repos.value.map(r => ({
 <template>
   <div class="repo-panel">
     <div class="panel-header">
-      <span class="panel-title">仓库</span>
+      <span class="panel-title">技能集合</span>
       <button
         class="icon-btn"
         @click="emit('updateAll')"
@@ -169,10 +169,12 @@ const repoList = computed(() => repos.value.map(r => ({
 .repo-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 8px;
+  padding: 6px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-/* TransitionGroup animations */
 .list-enter-active {
   transition: all 0.25s ease-out;
 }
@@ -194,25 +196,32 @@ const repoList = computed(() => repos.value.map(r => ({
 .repo-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 10px;
+  gap: 10px;
+  padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
   position: relative;
-  transition: background 0.18s ease, box-shadow 0.18s ease;
+  transition: background 0.18s ease;
 }
-.repo-item:not(:last-child) {
-  margin-bottom: 2px;
+.repo-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 28px;
+  right: 12px;
+  height: 1px;
+  background: var(--border);
+  opacity: 0.5;
 }
 .repo-item:hover {
   background: var(--bg-surface-hover);
 }
 .repo-item.selected {
   background: var(--bg-surface-hover);
-  box-shadow: inset 3px 0 0 var(--primary), var(--inset-shadow);
+  box-shadow: inset 3px 0 0 var(--primary);
+  border-radius: 8px;
 }
 
-/* Status indicator dot */
 .repo-status-dot {
   width: 6px;
   height: 6px;
@@ -234,7 +243,7 @@ const repoList = computed(() => repos.value.map(r => ({
 }
 @keyframes pulse-dot {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 30%, transparent); }
-  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 0%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--success) 0%, transparent); }
 }
 
 .repo-info {
@@ -242,7 +251,7 @@ const repoList = computed(() => repos.value.map(r => ({
   min-width: 0;
 }
 .repo-name {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -253,8 +262,8 @@ const repoList = computed(() => repos.value.map(r => ({
 .repo-subtitle {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.875rem;
+  gap: 5px;
+  font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 1px;
   font-weight: 450;
@@ -264,6 +273,9 @@ const repoList = computed(() => repos.value.map(r => ({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.repo-item:hover .repo-subtitle {
+  color: var(--text-secondary);
 }
 .repo-item.selected .repo-subtitle {
   color: var(--text-secondary);
@@ -284,6 +296,7 @@ const repoList = computed(() => repos.value.map(r => ({
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
   line-height: 1;
+  transition: background 0.15s, color 0.15s;
 }
 .repo-item:hover .skill-count {
   background: color-mix(in srgb, var(--text-secondary) 15%, transparent);
@@ -302,7 +315,7 @@ const repoList = computed(() => repos.value.map(r => ({
   flex-shrink: 0;
 }
 .repo-time {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -315,16 +328,16 @@ const repoList = computed(() => repos.value.map(r => ({
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: var(--success);
 }
 
 .repo-actions {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.18s ease;
 }
 .repo-item:hover .repo-actions {
   opacity: 1;
@@ -337,7 +350,6 @@ const repoList = computed(() => repos.value.map(r => ({
   width: 26px;
 }
 
-/* Empty state */
 .empty {
   display: flex;
   flex-direction: column;
@@ -385,7 +397,6 @@ const repoList = computed(() => repos.value.map(r => ({
   border-color: var(--primary);
 }
 
-/* Icon buttons */
 .icon-btn {
   width: 28px;
   height: 28px;
