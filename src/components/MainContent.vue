@@ -5,7 +5,7 @@ import { useSkills } from '../composables/useSkills';
 import { useRepos } from '../composables/useRepos';
 import { parseRepoUrl } from '../utils/repo';
 import SkillCard from './SkillCard.vue';
-import { RefreshCw, Loader2, Inbox } from 'lucide-vue-next';
+import { RefreshCw, Loader2, Inbox, Copy, Check } from 'lucide-vue-next';
 
 const props = defineProps<{
   repoUrl: string | null;
@@ -23,6 +23,15 @@ const skills = ref<Skill[]>([]);
 const loading = ref(false);
 
 const currentRepo = ref<Repo | null>(null);
+const copied = ref(false);
+
+function copyRepoUrl() {
+  if (!currentRepo.value) return;
+  navigator.clipboard.writeText(currentRepo.value.url).then(() => {
+    copied.value = true;
+    setTimeout(() => { copied.value = false; }, 1500);
+  });
+}
 
 const repoMeta = computed(() => {
   if (!currentRepo.value) return null;
@@ -67,8 +76,17 @@ watch(
     <template v-else-if="currentRepo">
       <div class="content-header">
         <div class="header-info">
-          <h2 class="repo-title">{{ repoMeta?.owner || currentRepo.name }}</h2>
-          <span class="repo-subtitle">{{ repoMeta?.name || currentRepo.url }}</span>
+          <div class="title-row">
+            <h2 class="repo-title">{{ repoMeta?.owner || currentRepo.name }}</h2>
+            <template v-if="repoMeta?.name">
+              <span class="title-sep">/</span>
+              <span class="repo-name">{{ repoMeta.name }}</span>
+            </template>
+          </div>
+          <button class="url-chip" @click="copyRepoUrl" :title="copied ? '已复制' : '点击复制地址'">
+            <span class="url-text">{{ currentRepo!.url }}</span>
+            <component :is="copied ? Check : Copy" :size="11" class="copy-icon" :class="{ copied }" />
+          </button>
         </div>
         <button
           class="update-btn"
@@ -108,23 +126,73 @@ watch(
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--border);
 }
 .header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
 }
 .repo-title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--text-primary);
+  white-space: nowrap;
 }
-.repo-subtitle {
-  font-size: 0.8rem;
+.title-sep {
   color: var(--text-muted);
-  display: block;
-  margin-top: 2px;
+  font-weight: 300;
+}
+.repo-name {
+  font-size: 1.05rem;
+  font-weight: 450;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.url-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  max-width: 100%;
+  align-self: flex-start;
+  font-family: inherit;
+}
+.url-chip:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--text-muted);
+}
+.url-text {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+.copy-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.copy-icon.copied {
+  color: var(--success, #22c55e);
 }
 .update-btn {
   display: flex;
