@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { useTheme } from '../composables/useTheme';
-import { Sun, Moon, Settings } from 'lucide-vue-next';
+import { Sun, Moon, Settings, Star } from 'lucide-vue-next';
 
 const { resolvedTheme, cycleTheme } = useTheme();
 
-defineEmits<{
+const props = defineProps<{
+  activeView: 'repos' | 'favorites';
+}>();
+
+const emit = defineEmits<{
   settings: [];
+  favorites: [];
+  repos: [];
 }>();
 
 const themeIcon = {
@@ -29,6 +35,23 @@ const themeTitle = {
         <rect x="41" y="130" width="102" height="14" rx="6" fill="currentColor" />
         </svg>
       </div>
+      <div class="nav-divider"></div>
+      <button
+        class="nav-btn"
+        :class="{ active: props.activeView === 'repos' }"
+        title="技能列表"
+        @click="emit('repos')"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+      <button
+        class="nav-btn"
+        :class="{ active: props.activeView === 'favorites' }"
+        title="收藏列表"
+        @click="emit('favorites')"
+      >
+        <Star :size="18" />
+      </button>
     </div>
     <div class="rail-bottom">
       <button
@@ -38,7 +61,7 @@ const themeTitle = {
       >
         <component :is="themeIcon[resolvedTheme]" :size="18" />
       </button>
-      <button class="theme-btn" title="设置" @click="$emit('settings')">
+      <button class="theme-btn" title="设置" @click="emit('settings')">
         <Settings :size="18" />
       </button>
     </div>
@@ -74,6 +97,33 @@ const themeTitle = {
   align-items: center;
   justify-content: center;
   filter: drop-shadow(0 1px 2px rgba(255, 122, 39, 0.25));
+}
+.nav-divider {
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+.nav-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
 }
 .rail-bottom {
   margin-top: auto;
