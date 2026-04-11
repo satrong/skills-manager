@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { ToolType } from '../types';
 import { TOOL_LABELS } from '../utils/toolPaths';
 import { useSettings } from '../composables/useSettings';
+import { invoke } from '@tauri-apps/api/core';
 
 const emit = defineEmits<{
   close: [];
@@ -11,10 +12,40 @@ const emit = defineEmits<{
 const { defaultToolType, setDefaultToolType } = useSettings();
 
 const selected = ref<ToolType>(defaultToolType.value);
+const projectPathCount = ref<number | null>(null);
+const toolPathCount = ref<number | null>(null);
+const clearing = ref(false);
 
 const tools: { value: ToolType; label: string }[] = (
   Object.entries(TOOL_LABELS) as [ToolType, string][]
 ).map(([value, label]) => ({ value, label }));
+
+async function loadCounts() {
+  try {
+    const config = await invoke<{ projectPaths: string[]; toolPaths: Record<string, string> }>('load_config');
+    projectPathCount.value = config.projectPaths.length;
+    toolPathCount.value = Object.keys(config.toolPaths).length;
+  } catch {
+    projectPathCount.value = 0;
+    toolPathCount.value = 0;
+  }
+}
+loadCounts();
+
+const totalCount = computed(() => (projectPathCount.value ?? 0) + (toolPathCount.value ?? 0));
+
+async function handleClearAll() {
+  clearing.value = true;
+  try {
+    await Promise.all([
+      invoke('clear_project_paths'),
+      invoke('clear_tool_paths'),
+    ]);
+    projectPathCount.value = 0;
+    toolPathCount.value = 0;
+  } catch { /* ignore */ }
+  clearing.value = false;
+}
 
 function handleSave() {
   setDefaultToolType(selected.value);
@@ -35,6 +66,20 @@ function handleSave() {
             {{ tool.label }}
           </option>
         </select>
+      </div>
+
+      <div class="section">
+        <label>路径历史</label>
+        <p class="desc">
+          安装技能时的路径记录（项目路径 {{ projectPathCount ?? '...' }} 条，工具路径 {{ toolPathCount ?? '...' }} 条）。
+        </p>
+        <button
+          class="danger-btn"
+          :disabled="clearing || totalCount === 0"
+          @click="handleClearAll"
+        >
+          {{ clearing ? '清空中...' : '清空所有路径历史' }}
+        </button>
       </div>
 
       <div class="actions">
@@ -103,4 +148,14 @@ button {
 button:hover { background: var(--bg-surface); }
 button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
 button.primary:hover:not(:disabled) { background: var(--primary-hover); }
+.danger-btn {
+  align-self: flex-start;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: transparent;
+}
+.danger-btn:hover:not(:disabled) { background: var(--danger); color: #fff; }
+.danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

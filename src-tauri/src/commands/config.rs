@@ -87,3 +87,17 @@ pub async fn set_default_tool_type(tool_type: Option<String>) -> Result<(), Stri
     config.default_tool_type = tool_type;
     save_config_to_disk(&config)
 }
+
+#[tauri::command]
+pub async fn clear_project_paths() -> Result<(), String> {
+    let mut config = load_config_from_disk()?;
+    config.project_paths.clear();
+    save_config_to_disk(&config)
+}
+
+#[tauri::command]
+pub async fn clear_tool_paths() -> Result<(), String> {
+    let mut config = load_config_from_disk()?;
+    config.tool_paths.clear();
+    save_config_to_disk(&config)
+}

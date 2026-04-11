@@ -21,10 +21,15 @@ async function setDefaultToolType(toolType: ToolType) {
   defaultToolType.value = toolType;
 }
 
+async function clearProjectPaths() {
+  await invoke('clear_project_paths');
+}
+
 export function useSettings() {
   return {
     defaultToolType,
     loadSettings,
     setDefaultToolType,
+    clearProjectPaths,
   };
 }

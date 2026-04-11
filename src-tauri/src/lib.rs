@@ -20,6 +20,8 @@ pub fn run() {
             config::remove_project_path,
             config::get_default_tool_type,
             config::set_default_tool_type,
+            config::clear_project_paths,
+            config::clear_tool_paths,
             // 仓库
             repo::add_repo,
             repo::remove_repo,
