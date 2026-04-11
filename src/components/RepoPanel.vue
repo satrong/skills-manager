@@ -153,11 +153,11 @@ const repoList = computed(() => repos.value.map(r => ({
   z-index: 1;
 }
 .panel-header {
-  padding: 12px 14px;
+  height: 53px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border);
 }
 .panel-title {
   font-size: 0.75rem;

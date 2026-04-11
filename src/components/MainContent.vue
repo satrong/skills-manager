@@ -3,10 +3,9 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Repo, Skill, ToolType } from '../types';
 import { useSkills } from '../composables/useSkills';
 import { useRepos } from '../composables/useRepos';
-import { parseRepoUrl } from '../utils/repo';
 import SkillCard from './SkillCard.vue';
 import type { QuickInstallEntry } from './SkillCard.vue';
-import { RefreshCw, Loader2, Inbox, Copy, Check } from 'lucide-vue-next';
+import { Loader2, Inbox, Search, Copy, Check } from 'lucide-vue-next';
 import { invoke } from '@tauri-apps/api/core';
 import { useSettings } from '../composables/useSettings';
 import { TOOL_LABELS } from '../utils/toolPaths';
@@ -17,7 +16,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   installSkill: [skill: Skill];
-  updateRepo: [url: string];
   quickInstallSkill: [skill: Skill, entry: QuickInstallEntry];
 }>();
 
@@ -28,6 +26,7 @@ const { defaultToolType, projectPaths, loadProjectPaths, removeProjectPath } = u
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
 const openDropdownId = ref<string | null>(null);
+const searchQuery = ref('');
 
 const toolPathsConfig = ref<Record<string, string>>({});
 
@@ -88,9 +87,12 @@ function copyRepoUrl() {
   });
 }
 
-const repoMeta = computed(() => {
-  if (!currentRepo.value) return null;
-  return parseRepoUrl(currentRepo.value.url);
+const filteredSkills = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return skills.value;
+  return skills.value.filter(
+    s => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q),
+  );
 });
 
 watch(
@@ -99,6 +101,7 @@ watch(
     if (!url) {
       skills.value = [];
       currentRepo.value = null;
+      searchQuery.value = '';
       return;
     }
     currentRepo.value = repos.value.find(r => r.url === url) || null;
@@ -143,29 +146,23 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 
     <!-- Repo content -->
     <template v-else-if="currentRepo">
-      <div class="content-header">
-        <div class="header-info">
-          <div class="title-row">
-            <h2 class="repo-title">{{ isLocalRepo ? currentRepo!.name : (repoMeta?.owner || currentRepo!.name) }}</h2>
-            <template v-if="!isLocalRepo && repoMeta?.name">
-              <span class="title-sep">/</span>
-              <span class="repo-name">{{ repoMeta.name }}</span>
-            </template>
-            <span v-if="isLocalRepo" class="local-badge">本地</span>
-          </div>
+      <div class="sticky-header">
+        <div class="search-bar">
+          <Search :size="14" class="search-icon" />
+          <input
+            v-if="skills.length > 1"
+            v-model="searchQuery"
+            type="text"
+            class="search-input"
+            placeholder="搜索技能..."
+          />
+          <span v-else class="search-input placeholder-text">搜索技能...</span>
+          <div class="header-divider"></div>
           <button class="url-chip" @click="copyRepoUrl" :title="copied ? '已复制' : '点击复制地址'">
             <span class="url-text">{{ isLocalRepo ? currentRepo!.localPath : currentRepo!.url }}</span>
             <component :is="copied ? Check : Copy" :size="11" class="copy-icon" :class="{ copied }" />
           </button>
         </div>
-        <button
-          class="update-btn"
-          @click="emit('updateRepo', currentRepo!.url)"
-          title="更新仓库"
-        >
-          <RefreshCw :size="14" />
-          <span>更新</span>
-        </button>
       </div>
 
       <div v-if="skills.length === 0" class="empty-state">
@@ -173,19 +170,26 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
         <p>未找到技能</p>
       </div>
 
-      <div v-else class="skills-grid">
-        <SkillCard
-          v-for="skill in skills"
-          :key="skill.id"
-          :skill="skill"
-          :quick-install-entries="quickInstallEntries"
-          :open-dropdown="openDropdownId === skill.id"
-          @install="emit('installSkill', $event)"
-          @quick-install="(skill, entry) => emit('quickInstallSkill', skill, entry)"
-          @remove-quick-install-entry="removeQuickInstallEntry"
-          @toggle-dropdown="openDropdownId = openDropdownId === skill.id ? null : skill.id"
-        />
-      </div>
+      <template v-else>
+        <div v-if="filteredSkills.length === 0" class="empty-state">
+          <Inbox :size="48" class="empty-icon" />
+          <p>未找到匹配的技能</p>
+        </div>
+
+        <div v-else class="skills-grid">
+          <SkillCard
+            v-for="skill in filteredSkills"
+            :key="skill.id"
+            :skill="skill"
+            :quick-install-entries="quickInstallEntries"
+            :open-dropdown="openDropdownId === skill.id"
+            @install="emit('installSkill', $event)"
+            @quick-install="(skill, entry) => emit('quickInstallSkill', skill, entry)"
+            @remove-quick-install-entry="removeQuickInstallEntry"
+            @toggle-dropdown="openDropdownId = openDropdownId === skill.id ? null : skill.id"
+          />
+        </div>
+      </template>
     </template>
   </div>
 </template>
@@ -198,70 +202,93 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
   background: var(--content-bg);
   position: relative;
 }
-.content-header {
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 53px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
+  background: var(--content-bg);
   border-bottom: 1px solid var(--border);
 }
-.header-info {
+.sticky-header::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--content-bg) 80%, transparent), transparent);
+  pointer-events: none;
+}
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  padding: 12px 20px 20px;
+}
+.search-bar {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
+.search-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 12%, transparent);
 }
-.repo-title {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-.title-sep {
+.search-icon {
   color: var(--text-muted);
-  font-weight: 300;
+  flex-shrink: 0;
 }
-.repo-name {
-  font-size: 0.875rem;
-  font-weight: 450;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  min-width: 0;
 }
-.local-badge {
-  font-size: 0.7rem;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--primary) 15%, transparent);
-  color: var(--primary);
-  font-weight: 500;
+.search-input::placeholder,
+.placeholder-text {
+  color: var(--text-muted);
+}
+.placeholder-text {
+  flex: 1;
+  font-size: 0.8rem;
   white-space: nowrap;
+  user-select: none;
+}
+.header-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  flex-shrink: 0;
 }
 .url-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 10px;
+  padding: 2px 8px;
   border-radius: 4px;
   background: transparent;
-  border: 1px solid var(--border);
+  border: none;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  max-width: 100%;
-  align-self: flex-start;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  max-width: 320px;
   font-family: inherit;
 }
 .url-chip:hover {
   background: var(--bg-surface-hover);
-  border-color: var(--text-muted);
 }
 .url-text {
   font-size: 0.75rem;
@@ -269,7 +296,6 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 360px;
 }
 .copy-icon {
   color: var(--text-muted);
@@ -278,30 +304,6 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 }
 .copy-icon.copied {
   color: var(--success, #22c55e);
-}
-.update-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-surface);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-.update-btn:hover {
-  background: var(--bg-surface-hover);
-  color: var(--text-primary);
-}
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-  padding: 20px;
 }
 .empty-state {
   display: flex;

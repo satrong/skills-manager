@@ -139,7 +139,6 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
     <MainContent
       :repo-url="selectedRepoUrl"
       @install-skill="selectedSkill = $event"
-      @update-repo="handleUpdateRepo"
       @quick-install-skill="handleQuickInstall"
     />
   </div>
