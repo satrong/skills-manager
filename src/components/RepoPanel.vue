@@ -65,14 +65,25 @@ const repoList = computed(() => repos.value.map(r => ({
           @click="emit('select', repo.url)"
         >
           <div class="repo-status-dot" :class="{ active: repo.url === selectedRepoUrl, cloning: addRepoUrl === repo.url }"></div>
-          <div class="repo-icon" v-if="repo.isLocal">
-            <Folder :size="14" />
-          </div>
           <div class="repo-info">
             <div class="repo-name">{{ repo.isLocal ? repo.name : (repo.meta.owner || repo.name) }}</div>
-            <div class="repo-subtitle">{{ repo.isLocal ? '本地目录' : repo.meta.name }}</div>
+            <div class="repo-subtitle">
+              <Folder v-if="repo.isLocal" :size="12" class="local-folder-icon" />
+              {{ repo.isLocal ? '本地目录' : repo.meta.name }}
+            </div>
           </div>
-          <div class="repo-meta">
+          <div class="repo-meta" v-if="repo.isLocal">
+            <div class="repo-actions" @click.stop>
+              <button
+                class="icon-btn-sm danger"
+                @click="emit('remove', repo.url)"
+                title="删除"
+              >
+                <Trash2 :size="13" />
+              </button>
+            </div>
+          </div>
+          <div class="repo-meta" v-else>
             <span v-if="addRepoUrl === repo.url" class="repo-updating">
               <Loader2 :size="11" class="spin" />
               <span>克隆中</span>
@@ -227,12 +238,6 @@ const repoList = computed(() => repos.value.map(r => ({
   flex: 1;
   min-width: 0;
 }
-.repo-icon {
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
 .repo-name {
   font-size: 1rem;
   font-weight: 600;
@@ -266,6 +271,11 @@ const repoList = computed(() => repos.value.map(r => ({
   font-size: 0.75rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+.local-folder-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  vertical-align: -1px;
 }
 .repo-updating {
   display: flex;
