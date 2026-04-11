@@ -68,8 +68,10 @@ const repoList = computed(() => repos.value.map(r => ({
           <div class="repo-info">
             <div class="repo-name">{{ repo.isLocal ? repo.name : (repo.meta.owner || repo.name) }}</div>
             <div class="repo-subtitle">
-              <Folder v-if="repo.isLocal" :size="12" class="local-folder-icon" />
-              {{ repo.isLocal ? '本地目录' : repo.meta.name }}
+              <span class="repo-subtitle-text">
+                <Folder v-if="repo.isLocal" :size="12" class="local-folder-icon" />
+                {{ repo.isLocal ? '本地目录' : repo.meta.name }}
+              </span>
               <span v-if="repo.skillCount != null" class="skill-count">{{ repo.skillCount }}</span>
             </div>
           </div>
@@ -249,13 +251,19 @@ const repoList = computed(() => repos.value.map(r => ({
   letter-spacing: -0.01em;
 }
 .repo-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.875rem;
   color: var(--text-muted);
   margin-top: 1px;
+  font-weight: 450;
+}
+.repo-subtitle-text {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 450;
 }
 .repo-item.selected .repo-subtitle {
   color: var(--text-secondary);
@@ -274,8 +282,7 @@ const repoList = computed(() => repos.value.map(r => ({
   font-size: 0.65rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  margin-left: 4px;
-  vertical-align: middle;
+  flex-shrink: 0;
   line-height: 1;
 }
 .repo-item:hover .skill-count {
