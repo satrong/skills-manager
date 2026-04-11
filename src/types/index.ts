@@ -14,6 +14,7 @@ export interface Repo {
   localPath: string;
   name: string;
   lastUpdate: string;
+  source: 'git' | 'local';
   skills?: Skill[];
 }
 

@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+fn default_source() -> String {
+    "git".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Repo {
@@ -10,6 +14,8 @@ pub struct Repo {
     pub name: String,
     #[serde(alias = "last_update")]
     pub last_update: String,
+    #[serde(default = "default_source")]
+    pub source: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

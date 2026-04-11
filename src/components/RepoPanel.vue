@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useRepos } from '../composables/useRepos';
 import { parseRepoUrl } from '../utils/repo';
-import { RefreshCw, Trash2, Plus, Loader2 } from 'lucide-vue-next';
+import { RefreshCw, Trash2, Plus, Loader2, Folder } from 'lucide-vue-next';
 
 defineProps<{
   selectedRepoUrl: string | null;
@@ -34,7 +34,11 @@ function formatTime(timestamp: string): string {
   return now.getFullYear() === y ? `${m}-${d}` : `${y}-${m}-${d}`;
 }
 
-const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl(r.url) })));
+const repoList = computed(() => repos.value.map(r => ({
+  ...r,
+  meta: parseRepoUrl(r.url),
+  isLocal: r.source === 'local',
+})));
 </script>
 
 <template>
@@ -61,9 +65,12 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
           @click="emit('select', repo.url)"
         >
           <div class="repo-status-dot" :class="{ active: repo.url === selectedRepoUrl, cloning: addRepoUrl === repo.url }"></div>
+          <div class="repo-icon" v-if="repo.isLocal">
+            <Folder :size="14" />
+          </div>
           <div class="repo-info">
-            <div class="repo-name">{{ repo.meta.owner || repo.name }}</div>
-            <div class="repo-subtitle">{{ repo.meta.name }}</div>
+            <div class="repo-name">{{ repo.isLocal ? repo.name : (repo.meta.owner || repo.name) }}</div>
+            <div class="repo-subtitle">{{ repo.isLocal ? '本地目录' : repo.meta.name }}</div>
           </div>
           <div class="repo-meta">
             <span v-if="addRepoUrl === repo.url" class="repo-updating">
@@ -113,7 +120,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
     <div class="panel-footer">
       <button class="add-btn" @click="emit('add')">
         <Plus :size="15" />
-        <span>添加仓库</span>
+        <span>添加来源</span>
       </button>
     </div>
   </div>
@@ -219,6 +226,12 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
 .repo-info {
   flex: 1;
   min-width: 0;
+}
+.repo-icon {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 .repo-name {
   font-size: 1rem;

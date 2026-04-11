@@ -41,6 +41,7 @@ export function useRepos() {
       localPath: '',
       name: extractRepoName(url),
       lastUpdate: '',
+      source: 'git',
       skills: [],
     });
 
@@ -54,6 +55,36 @@ export function useRepos() {
     } catch (e) {
       // Remove placeholder on error
       repos.value = repos.value.filter(r => r.url !== url);
+      error.value = String(e);
+      throw e;
+    } finally {
+      addRepoUrl.value = null;
+    }
+  }
+
+  async function addLocalDir(path: string): Promise<void> {
+    addRepoUrl.value = `local://${path}`;
+    error.value = null;
+
+    const dirName = path.replace(/\/+$/, '').split('/').pop() || path;
+
+    repos.value.push({
+      url: '',
+      localPath: '',
+      name: dirName,
+      lastUpdate: '',
+      source: 'local',
+      skills: [],
+    });
+
+    try {
+      const repo = await invoke<Repo>('add_local_dir', { path });
+      const index = repos.value.findIndex(r => r.source === 'local' && r.name === dirName && !r.url);
+      if (index !== -1) {
+        repos.value[index] = { ...repo, skills: [] };
+      }
+    } catch (e) {
+      repos.value = repos.value.filter(r => !(r.source === 'local' && r.name === dirName && !r.url));
       error.value = String(e);
       throw e;
     } finally {
@@ -117,6 +148,7 @@ export function useRepos() {
     error: readonly(error),
     loadRepos,
     addRepo,
+    addLocalDir,
     removeRepo,
     updateRepo,
     updateAllRepos,

@@ -24,6 +24,7 @@ pub fn run() {
             config::clear_tool_paths,
             // 仓库
             repo::add_repo,
+            repo::add_local_dir,
             repo::remove_repo,
             repo::update_repo,
             repo::update_all_repos,

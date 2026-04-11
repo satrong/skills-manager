@@ -21,6 +21,7 @@ const {
   error: reposError,
   loadRepos,
   addRepo,
+  addLocalDir,
   removeRepo,
   updateRepo,
   updateAllRepos,
@@ -55,6 +56,13 @@ function handleAddRepo(url: string) {
     .catch(() => { /* error already handled by watch */ });
 }
 
+function handleAddLocalDir(path: string) {
+  showAddRepo.value = false;
+  addLocalDir(path)
+    .then(() => addToast('本地目录添加成功', 'success'))
+    .catch(() => { /* error already handled by watch */ });
+}
+
 async function handleUpdateAll() {
   try {
     const results = await updateAllRepos();
@@ -76,10 +84,15 @@ async function handleUpdateRepo(url: string) {
 }
 
 async function handleRemoveRepo(url: string) {
-  const confirmed = await ask('确定删除该仓库？本地克隆的文件也会被删除。', {
-    title: '删除仓库',
+  const repo = repos.value.find(r => r.url === url);
+  const isLocal = repo?.source === 'local';
+  const message = isLocal
+    ? '确定移除该本地目录？文件不会被删除。'
+    : '确定删除该仓库？本地克隆的文件也会被删除。';
+  const confirmed = await ask(message, {
+    title: isLocal ? '移除本地目录' : '删除仓库',
     kind: 'warning',
-    okLabel: '删除',
+    okLabel: isLocal ? '移除' : '删除',
     cancelLabel: '取消',
   });
   if (!confirmed) return;
@@ -139,6 +152,7 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
   <RepoManager
     v-if="showAddRepo"
     @add="handleAddRepo"
+    @add-local="handleAddLocalDir"
     @close="showAddRepo = false"
   />
   <SkillDialog

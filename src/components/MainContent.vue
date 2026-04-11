@@ -77,10 +77,12 @@ onMounted(async () => {
 
 const currentRepo = ref<Repo | null>(null);
 const copied = ref(false);
+const isLocalRepo = computed(() => currentRepo.value?.source === 'local');
 
 function copyRepoUrl() {
   if (!currentRepo.value) return;
-  navigator.clipboard.writeText(currentRepo.value.url).then(() => {
+  const textToCopy = isLocalRepo.value ? currentRepo.value.localPath : currentRepo.value.url;
+  navigator.clipboard.writeText(textToCopy).then(() => {
     copied.value = true;
     setTimeout(() => { copied.value = false; }, 1500);
   });
@@ -144,14 +146,15 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
       <div class="content-header">
         <div class="header-info">
           <div class="title-row">
-            <h2 class="repo-title">{{ repoMeta?.owner || currentRepo.name }}</h2>
-            <template v-if="repoMeta?.name">
+            <h2 class="repo-title">{{ isLocalRepo ? currentRepo!.name : (repoMeta?.owner || currentRepo!.name) }}</h2>
+            <template v-if="!isLocalRepo && repoMeta?.name">
               <span class="title-sep">/</span>
               <span class="repo-name">{{ repoMeta.name }}</span>
             </template>
+            <span v-if="isLocalRepo" class="local-badge">本地</span>
           </div>
           <button class="url-chip" @click="copyRepoUrl" :title="copied ? '已复制' : '点击复制地址'">
-            <span class="url-text">{{ currentRepo!.url }}</span>
+            <span class="url-text">{{ isLocalRepo ? currentRepo!.localPath : currentRepo!.url }}</span>
             <component :is="copied ? Check : Copy" :size="11" class="copy-icon" :class="{ copied }" />
           </button>
         </div>
@@ -232,6 +235,15 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.local-badge {
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  font-weight: 500;
+  white-space: nowrap;
 }
 .url-chip {
   display: inline-flex;
