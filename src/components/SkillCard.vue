@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import type { Skill, ToolType } from '../types';
 
 export interface QuickInstallEntry {
@@ -26,6 +26,23 @@ const hasEntries = computed(() =>
   props.quickInstallEntries && props.quickInstallEntries.length > 0
 );
 
+const dropdownRef = ref<HTMLElement | null>(null);
+const dropUp = ref(false);
+
+watch(() => props.openDropdown, async (open) => {
+  if (!open) return;
+  dropUp.value = false;
+  await nextTick();
+  const el = dropdownRef.value;
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.top;
+  const spaceAbove = rect.bottom - rect.height;
+  if (spaceBelow < rect.height && spaceAbove > spaceBelow) {
+    dropUp.value = true;
+  }
+});
+
 function handleToggleDropdown(e: Event) {
   e.stopPropagation();
   emit('toggleDropdown');
@@ -48,7 +65,7 @@ function pathDisplay(targetPath: string) {
 </script>
 
 <template>
-  <div class="skill-card" @click="emit('toggleDropdown')">
+  <div class="skill-card" :class="{ 'dropdown-open': openDropdown }" @click="emit('toggleDropdown')">
     <div class="skill-name">{{ skill.name }}</div>
     <div class="skill-description">{{ skill.description }}</div>
     <div class="skill-meta">
@@ -70,7 +87,7 @@ function pathDisplay(targetPath: string) {
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <div v-if="openDropdown" class="install-dropdown">
+        <div v-if="openDropdown" ref="dropdownRef" class="install-dropdown" :class="{ 'drop-up': dropUp }">
           <template v-for="(entry, idx) in quickInstallEntries" :key="idx">
             <div v-if="entry.header" class="dropdown-header">
               <span class="item-label">{{ entry.label }}</span>
@@ -108,7 +125,10 @@ function pathDisplay(targetPath: string) {
   border-color: var(--primary);
   box-shadow: var(--card-hover-shadow);
   background: var(--card-hover-bg);
-
+}
+.skill-card.dropdown-open {
+  position: relative;
+  z-index: 20;
 }
 .skill-name {
   font-weight: 600;
@@ -208,6 +228,10 @@ function pathDisplay(targetPath: string) {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   z-index: 50;
   overflow: hidden;
+}
+.install-dropdown.drop-up {
+  top: auto;
+  bottom: calc(100% + 4px);
 }
 .dropdown-header {
   padding: 6px 12px;
