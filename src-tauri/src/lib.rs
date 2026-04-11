@@ -15,6 +15,8 @@ pub fn run() {
             config::save_config,
             config::get_tool_path,
             config::set_tool_path,
+            config::get_project_paths,
+            config::add_project_path,
             // 仓库
             repo::add_repo,
             repo::remove_repo,

@@ -32,6 +32,8 @@ pub struct AppConfig {
     pub repos: Vec<Repo>,
     #[serde(default)]
     pub tool_paths: std::collections::HashMap<String, String>,
+    #[serde(default)]
+    pub project_paths: Vec<String>,
 }
 
 impl Default for AppConfig {
@@ -39,6 +41,7 @@ impl Default for AppConfig {
         AppConfig {
             repos: vec![],
             tool_paths: std::collections::HashMap::new(),
+            project_paths: vec![],
         }
     }
 }

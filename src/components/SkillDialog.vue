@@ -5,6 +5,7 @@ import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
 import { listen, type UnlistenFn, TauriEvent } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
+import { invoke } from '@tauri-apps/api/core';
 
 const props = defineProps<{
   skill: Skill;
@@ -26,6 +27,8 @@ const loading = ref(false);
 const error = ref('');
 const overwriteConfirm = ref(false);
 const isDragging = ref(false);
+const projectPaths = ref<string[]>([]);
+const showPathDropdown = ref(false);
 
 const unlistenFns: UnlistenFn[] = [];
 
@@ -47,6 +50,10 @@ onMounted(async () => {
     isDragging.value = false;
   });
   unlistenFns.push(unlistenDrop, unlistenEnter, unlistenLeave);
+
+  try {
+    projectPaths.value = await invoke<string[]>('get_project_paths');
+  } catch { /* ignore */ }
 });
 
 onUnmounted(() => {
@@ -81,6 +88,27 @@ const pathSep = isWindows ? '\\' : '/';
 
 const isCustomTool = computed(() => toolType.value === 'custom');
 
+const filteredPaths = computed(() => {
+  const input = projectPath.value.toLowerCase();
+  if (!input) return projectPaths.value;
+  return projectPaths.value.filter(p => p.toLowerCase().includes(input));
+});
+
+function selectProjectPath(path: string) {
+  projectPath.value = path;
+  showPathDropdown.value = false;
+}
+
+function onPathInputFocus() {
+  if (filteredPaths.value.length > 0) {
+    showPathDropdown.value = true;
+  }
+}
+
+function onPathInputChange() {
+  showPathDropdown.value = filteredPaths.value.length > 0;
+}
+
 const previewPath = computed(() => {
   if (installType.value === 'project') {
     const base = projectPath.value || '<项目路径>';
@@ -114,6 +142,12 @@ async function handleInstall() {
       overwrite: overwriteConfirm.value,
       rememberPath: rememberPath.value,
     });
+
+    if (installType.value === 'project' && projectPath.value) {
+      try {
+        await invoke('add_project_path', { path: projectPath.value });
+      } catch { /* ignore */ }
+    }
 
     emit('installed', props.skill.id);
     emit('close');
@@ -189,12 +223,27 @@ async function selectFolder() {
           @dragover.prevent
           @drop.prevent
         >
-          <div class="path-row">
-            <input
-              v-model="projectPath"
-              type="text"
-              :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
-            />
+          <div class="path-row path-row-with-dropdown">
+            <div class="path-input-wrapper">
+              <input
+                v-model="projectPath"
+                type="text"
+                :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
+                @focus="onPathInputFocus"
+                @input="onPathInputChange"
+                @blur="showPathDropdown = false"
+              />
+              <div v-if="showPathDropdown && filteredPaths.length > 0" class="path-dropdown">
+                <div
+                  v-for="p in filteredPaths"
+                  :key="p"
+                  class="path-dropdown-item"
+                  @mousedown.prevent="selectProjectPath(p)"
+                >
+                  {{ p }}
+                </div>
+              </div>
+            </div>
             <button type="button" class="browse-btn" @click="selectFolder" title="选择文件夹">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
@@ -291,8 +340,37 @@ input[type="text"]:disabled {
   display: flex;
   gap: 8px;
 }
+.path-input-wrapper {
+  flex: 1;
+  position: relative;
+}
 .path-row input[type="text"] {
   flex: 1;
+}
+.path-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.path-dropdown-item {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  word-break: break-all;
+  transition: background 0.1s;
+}
+.path-dropdown-item:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 .browse-btn {
   display: flex;

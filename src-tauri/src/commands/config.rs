@@ -50,3 +50,20 @@ pub async fn set_tool_path(tool_type: String, path: String) -> Result<(), String
     config.tool_paths.insert(tool_type, path);
     save_config_to_disk(&config)
 }
+
+#[tauri::command]
+pub async fn get_project_paths() -> Result<Vec<String>, String> {
+    let config = load_config_from_disk()?;
+    Ok(config.project_paths)
+}
+
+#[tauri::command]
+pub async fn add_project_path(path: String) -> Result<(), String> {
+    let mut config = load_config_from_disk()?;
+    config.project_paths.retain(|p| p != &path);
+    config.project_paths.insert(0, path);
+    if config.project_paths.len() > 20 {
+        config.project_paths.truncate(20);
+    }
+    save_config_to_disk(&config)
+}
