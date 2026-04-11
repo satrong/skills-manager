@@ -135,6 +135,21 @@ export function useRepos() {
     return updateLoading.value[url] ?? false;
   }
 
+  async function ensureBuiltinRepos(): Promise<void> {
+    reposLoading.value = true
+    error.value = null
+    try {
+      const result = await invoke<Repo[]>('ensure_builtin_repos')
+      if (result.length > 0) {
+        repos.value = result
+      }
+    } catch (e) {
+      error.value = String(e)
+    } finally {
+      reposLoading.value = false
+    }
+  }
+
   return {
     repos: reposReadonly,
     reposLoading: readonly(reposLoading),
@@ -144,6 +159,7 @@ export function useRepos() {
     removeRepoLoading: readonly(removeRepoLoading),
     error: readonly(error),
     loadRepos,
+    ensureBuiltinRepos,
     addRepo,
     addLocalDir,
     removeRepo,

@@ -29,6 +29,7 @@ pub fn run() {
             repo::update_repo,
             repo::update_all_repos,
             repo::list_repos,
+            repo::ensure_builtin_repos,
             // 技能
             skill::list_skills,
             skill::search_skills,

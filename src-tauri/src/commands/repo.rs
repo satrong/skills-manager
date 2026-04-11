@@ -5,6 +5,12 @@ use crate::commands::skill::count_skills_from_repo;
 use std::fs;
 use std::path::PathBuf;
 
+const BUILTIN_REPO_URLS: &[&str] = &[
+    "https://github.com/anthropics/skills",
+    "https://github.com/openai/skills",
+    "https://github.com/obra/superpowers",
+];
+
 fn now_timestamp() -> String {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -180,4 +186,53 @@ pub async fn list_repos() -> Result<Vec<Repo>, String> {
         repo
     }).collect();
     Ok(repos)
+}
+
+#[tauri::command]
+pub async fn ensure_builtin_repos() -> Result<Vec<Repo>, String> {
+    let mut config = load_config_from_disk()?;
+
+    if !config.repos.is_empty() {
+        return Ok(config.repos.into_iter().map(|mut repo| {
+            repo.skill_count = Some(count_skills_from_repo(&repo.local_path, &repo.url));
+            repo
+        }).collect());
+    }
+
+    let repos_dir = paths::repos_dir()?;
+    let mut added = Vec::new();
+
+    for url in BUILTIN_REPO_URLS {
+        let dir_name = paths::repo_dir_name(url)?;
+        let local_path = repos_dir.join(&dir_name);
+
+        match git::clone_repo(url, &local_path) {
+            Ok(()) => {},
+            Err(e) => {
+                eprintln!("克隆内置仓库 {} 失败: {}", url, e);
+                continue;
+            }
+        }
+
+        let repo = Repo {
+            url: url.to_string(),
+            local_path: local_path.clone(),
+            name: dir_name,
+            last_update: now_timestamp(),
+            source: "git".to_string(),
+            skill_count: None,
+        };
+
+        config.repos.push(repo.clone());
+        added.push(repo);
+    }
+
+    if !added.is_empty() {
+        save_config_to_disk(&config)?;
+    }
+
+    Ok(added.into_iter().map(|mut repo| {
+        repo.skill_count = Some(count_skills_from_repo(&repo.local_path, &repo.url));
+        repo
+    }).collect())
 }

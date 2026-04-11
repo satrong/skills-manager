@@ -20,6 +20,7 @@ const {
   repos,
   error: reposError,
   loadRepos,
+  ensureBuiltinRepos,
   addRepo,
   addLocalDir,
   removeRepo,
@@ -44,6 +45,12 @@ watch(reposError, (err) => {
 
 onMounted(async () => {
   await Promise.all([loadRepos(), loadSettings()]);
+  if (repos.value.length === 0) {
+    await ensureBuiltinRepos();
+    if (repos.value.length > 0) {
+      addToast('已自动添加内置仓库', 'success');
+    }
+  }
   if (repos.value.length > 0) {
     selectedRepoUrl.value = repos.value[0].url;
   }
