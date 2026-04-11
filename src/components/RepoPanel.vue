@@ -121,8 +121,8 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
 
 <style scoped>
 .repo-panel {
-  width: 220px;
-  min-width: 220px;
+  width: 260px;
+  min-width: 260px;
   height: 100%;
   background: var(--bg-surface);
   border-right: 1px solid var(--border);
@@ -137,7 +137,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -219,7 +219,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   min-width: 0;
 }
 .repo-name {
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -228,7 +228,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   letter-spacing: -0.01em;
 }
 .repo-subtitle {
-  font-size: 0.72rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   margin-top: 1px;
   white-space: nowrap;
@@ -248,7 +248,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   flex-shrink: 0;
 }
 .repo-time {
-  font-size: 0.65rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -256,7 +256,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.65rem;
+  font-size: 0.875rem;
   color: var(--success);
 }
 
@@ -285,7 +285,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   align-items: center;
   gap: 6px;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   padding: 40px 12px 24px;
 }
 .empty-icon {
@@ -297,7 +297,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   color: var(--text-muted);
 }
 .empty-hint {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   opacity: 0.6;
 }
@@ -316,7 +316,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   border-radius: 6px;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }

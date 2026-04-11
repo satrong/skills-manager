@@ -143,7 +143,7 @@ watch(
 }
 .repo-title {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -153,7 +153,7 @@ watch(
   font-weight: 300;
 }
 .repo-name {
-  font-size: 1.05rem;
+  font-size: 0.875rem;
   font-weight: 450;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -179,7 +179,7 @@ watch(
   border-color: var(--text-muted);
 }
 .url-text {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -203,7 +203,7 @@ watch(
   border-radius: 6px;
   background: var(--bg-surface);
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
@@ -229,7 +229,7 @@ watch(
 }
 .empty-state p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
 }
 .empty-icon {
   opacity: 0.4;

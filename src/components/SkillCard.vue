@@ -47,11 +47,11 @@ const emit = defineEmits<{
 }
 .skill-name {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--text-primary);
 }
 .skill-description {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   line-height: 1.4;
   display: -webkit-box;
@@ -60,7 +60,7 @@ const emit = defineEmits<{
   overflow: hidden;
 }
 .skill-meta {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   display: flex;
   gap: 8px;
@@ -75,7 +75,7 @@ const emit = defineEmits<{
   color: var(--primary);
   border-radius: 4px;
   padding: 1px 6px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .card-footer {
   display: flex;
@@ -92,7 +92,7 @@ const emit = defineEmits<{
   border: 1px solid var(--border);
   border-radius: 5px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   transition: all 0.15s;
 }
 .install-btn:hover {
