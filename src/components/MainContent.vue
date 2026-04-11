@@ -5,23 +5,27 @@ import { useSkills } from '../composables/useSkills';
 import { useRepos } from '../composables/useRepos';
 import SkillCard from './SkillCard.vue';
 import type { QuickInstallEntry } from './SkillCard.vue';
-import { Loader2, Inbox, Search, Copy, Check } from 'lucide-vue-next';
+import { Loader2, Inbox, Search, Copy, Check, StarOff } from 'lucide-vue-next';
 import { invoke } from '@tauri-apps/api/core';
 import { useSettings } from '../composables/useSettings';
+import { useFavorites } from '../composables/useFavorites';
 import { TOOL_LABELS } from '../utils/toolPaths';
 
 const props = defineProps<{
   repoUrl: string | null;
+  viewMode: 'repos' | 'favorites';
 }>();
 
 const emit = defineEmits<{
   installSkill: [skill: Skill];
   quickInstallSkill: [skill: Skill, entry: QuickInstallEntry];
+  toggleFavorite: [skill: Skill];
 }>();
 
 const { repos } = useRepos();
-const { loadSkills } = useSkills();
+const { skillsByRepo, loadSkills } = useSkills();
 const { defaultToolType, projectPaths, loadProjectPaths, removeProjectPath } = useSettings();
+const { favorites, isFavorite, toggleFavorite, loadFavorites } = useFavorites();
 
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
@@ -72,6 +76,7 @@ onMounted(async () => {
     toolPathsConfig.value = config.toolPaths;
   } catch { /* ignore */ }
   await loadProjectPaths();
+  await loadFavorites();
 });
 
 const currentRepo = ref<Repo | null>(null);
@@ -94,6 +99,32 @@ const filteredSkills = computed(() => {
     s => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q),
   );
 });
+
+const favoriteSkills = computed<Skill[]>(() => {
+  const result: Skill[] = [];
+  for (const fav of favorites.value) {
+    const repoSkills = skillsByRepo.value[fav.repoUrl];
+    if (repoSkills) {
+      const skill = repoSkills.find(s => s.id === fav.skillId);
+      if (skill) result.push(skill);
+    }
+  }
+  return result;
+});
+
+const filteredFavoriteSkills = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return favoriteSkills.value;
+  return favoriteSkills.value.filter(
+    s => s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q),
+  );
+});
+
+async function handleToggleFavorite(skill: Skill) {
+  try {
+    await toggleFavorite(skill.id, skill.repoUrl);
+  } catch { /* ignore */ }
+}
 
 watch(
   () => props.repoUrl,
@@ -132,17 +163,63 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 
 <template>
   <div class="main-content">
-    <!-- No repo selected -->
-    <div v-if="!repoUrl" class="empty-state">
+    <!-- No repo selected (repos view) -->
+    <div v-if="props.viewMode === 'repos' && !repoUrl" class="empty-state">
       <Inbox :size="48" class="empty-icon" />
       <p>选择一个仓库查看技能</p>
     </div>
 
-    <!-- Loading -->
-    <div v-else-if="loading" class="loading-state">
+    <!-- Loading (repos view) -->
+    <div v-else-if="props.viewMode === 'repos' && loading" class="loading-state">
       <Loader2 :size="24" class="spin" />
       <span>加载技能中...</span>
     </div>
+
+    <!-- Favorites view -->
+    <template v-else-if="props.viewMode === 'favorites'">
+      <div class="sticky-header">
+        <div class="search-bar">
+          <Search :size="14" class="search-icon" />
+          <input
+            v-if="favoriteSkills.length > 1"
+            v-model="searchQuery"
+            type="text"
+            class="search-input"
+            placeholder="搜索收藏技能..."
+          />
+          <span v-else class="search-input placeholder-text">搜索收藏技能...</span>
+          <span class="fav-count">{{ favoriteSkills.length }} 个收藏</span>
+        </div>
+      </div>
+
+      <div v-if="favoriteSkills.length === 0" class="empty-state">
+        <StarOff :size="48" class="empty-icon" />
+        <p>暂无收藏技能</p>
+      </div>
+
+      <template v-else>
+        <div v-if="filteredFavoriteSkills.length === 0" class="empty-state">
+          <Inbox :size="48" class="empty-icon" />
+          <p>未找到匹配的收藏技能</p>
+        </div>
+
+        <div v-else class="skills-grid">
+          <SkillCard
+            v-for="skill in filteredFavoriteSkills"
+            :key="skill.id"
+            :skill="skill"
+            :is-favorite="true"
+            :quick-install-entries="quickInstallEntries"
+            :open-dropdown="openDropdownId === skill.id"
+            @install="emit('installSkill', $event)"
+            @quick-install="(skill, entry) => emit('quickInstallSkill', skill, entry)"
+            @remove-quick-install-entry="removeQuickInstallEntry"
+            @toggle-favorite="handleToggleFavorite"
+            @toggle-dropdown="openDropdownId = openDropdownId === skill.id ? null : skill.id"
+          />
+        </div>
+      </template>
+    </template>
 
     <!-- Repo content -->
     <template v-else-if="currentRepo">
@@ -181,11 +258,13 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
             v-for="skill in filteredSkills"
             :key="skill.id"
             :skill="skill"
+            :is-favorite="isFavorite(skill.id, skill.repoUrl)"
             :quick-install-entries="quickInstallEntries"
             :open-dropdown="openDropdownId === skill.id"
             @install="emit('installSkill', $event)"
             @quick-install="(skill, entry) => emit('quickInstallSkill', skill, entry)"
             @remove-quick-install-entry="removeQuickInstallEntry"
+            @toggle-favorite="handleToggleFavorite"
             @toggle-dropdown="openDropdownId = openDropdownId === skill.id ? null : skill.id"
           />
         </div>
@@ -328,6 +407,13 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
   height: 60%;
   gap: 8px;
   color: var(--text-muted);
+}
+
+.fav-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .spin {
