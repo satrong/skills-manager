@@ -138,7 +138,7 @@ function pathDisplay(targetPath: string) {
   box-shadow: var(--card-shadow);
 }
 .skill-card:hover {
-  border-color: var(--primary);
+  border-color: var(--border-strong);
   box-shadow: var(--card-hover-shadow);
   background: var(--card-hover-bg);
 }
