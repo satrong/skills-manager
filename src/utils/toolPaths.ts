@@ -26,6 +26,6 @@ export const PROJECT_TOOL_DIRS: Record<Exclude<ToolType, 'custom'>, string> = {
   'cursor': '.cursor\\rules',
   'codex': '.codex\\skills',
   'opencode': '.opencode\\skills',
-  'qoder': '.qoder\\rules',
+  'qoder': '.qoder\\skills',
   'kilo': '.kilocode\\rules',
 };

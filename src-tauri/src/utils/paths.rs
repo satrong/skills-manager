@@ -32,8 +32,7 @@ pub fn repo_dir_name(url: &str) -> Result<String, String> {
 
 /// 展开 %USERPROFILE% 到实际路径，并规范化路径分隔符
 pub fn expand_path(path: &str) -> Result<String, String> {
-    let home = dirs::home_dir()
-        .ok_or_else(|| "无法获取用户主目录".to_string())?;
+    let home = dirs::home_dir().ok_or_else(|| "无法获取用户主目录".to_string())?;
     let expanded = path.replace("%USERPROFILE%", &home.to_string_lossy());
     Ok(PathBuf::from(&expanded).to_string_lossy().to_string())
 }
@@ -60,7 +59,7 @@ pub fn project_tool_dir(tool: &str) -> Option<String> {
         "cursor" => PathBuf::from(".cursor").join("rules"),
         "codex" => PathBuf::from(".codex").join("skills"),
         "opencode" => PathBuf::from(".opencode").join("skills"),
-        "qoder" => PathBuf::from(".qoder").join("rules"),
+        "qoder" => PathBuf::from(".qoder").join("skills"),
         "kilo" => PathBuf::from(".kilocode").join("rules"),
         _ => return None,
     };
