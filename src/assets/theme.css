@@ -78,6 +78,23 @@ body {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   background: var(--bg-app);
   color: var(--text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.skill-name,
+.skill-description,
+.modal .desc {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .app-layout {
