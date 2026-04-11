@@ -71,7 +71,7 @@ function pathDisplay(targetPath: string) {
 </script>
 
 <template>
-  <div class="skill-card" :class="{ 'dropdown-open': openDropdown }" @click="emit('toggleDropdown')">
+  <div class="skill-card" :class="{ 'dropdown-open': openDropdown }" @click="emit('install', props.skill)">
     <div class="skill-name">{{ skill.name }}</div>
     <div class="skill-description">{{ skill.description }}</div>
     <div class="skill-meta">
