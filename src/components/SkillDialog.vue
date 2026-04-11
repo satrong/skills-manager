@@ -188,7 +188,10 @@ async function selectFolder() {
 <template>
   <div class="modal-overlay" @click.self="emit('close')" tabindex="0" @keydown.escape="emit('close')">
     <div class="modal">
-      <h2>安装技能: {{ skill.name }}</h2>
+      <h2>
+        <span class="install-label">安装技能</span>
+        <span class="skill-name">{{ skill.name }}</span>
+      </h2>
       <p class="desc">{{ skill.description }}</p>
 
       <div class="section">
@@ -310,7 +313,9 @@ async function selectFolder() {
   flex-direction: column;
   gap: 16px;
 }
-h2 { margin: 0; color: var(--text-primary); }
+h2 { margin: 0; color: var(--text-primary); display: flex; flex-direction: column; gap: 4px; }
+.install-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: normal; }
+.skill-name { font-size: inherit; }
 .desc { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
 .section { display: flex; flex-direction: column; gap: 8px; }
 label { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
