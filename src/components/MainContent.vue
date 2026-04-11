@@ -19,7 +19,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   installSkill: [skill: Skill];
   quickInstallSkill: [skill: Skill, entry: QuickInstallEntry];
-  toggleFavorite: [skill: Skill];
 }>();
 
 const { repos } = useRepos();
