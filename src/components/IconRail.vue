@@ -97,6 +97,11 @@ const themeTitle = {
   align-items: center;
   justify-content: center;
   filter: drop-shadow(0 1px 2px rgba(255, 122, 39, 0.25));
+  overflow: hidden;
+}
+.logo svg {
+  width: 100%;
+  height: 100%;
 }
 .nav-divider {
   width: 20px;

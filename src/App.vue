@@ -141,7 +141,7 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
     <IconRail :active-view="activeView" @settings="showSettings = true" @favorites="activeView = 'favorites'" @repos="activeView = 'repos'; selectedRepoUrl = repos.length > 0 ? repos[0].url : null" />
     <RepoPanel
       :selected-repo-url="selectedRepoUrl"
-      @select="selectedRepoUrl = $event"
+      @select="selectedRepoUrl = $event; activeView = 'repos'"
       @add="showAddRepo = true"
       @remove="handleRemoveRepo"
       @update="handleUpdateRepo"
