@@ -34,7 +34,6 @@ export interface InstallRequest {
   installType: InstallType;
   toolType: ToolType;
   targetPath: string;
-  rememberPath?: boolean;
 }
 
 export interface AppConfig {

@@ -1,4 +1,3 @@
-use crate::commands::config::{load_config_from_disk, save_config_to_disk};
 use crate::commands::skill::parse_skills_from_repo_url;
 use crate::utils::{junction, paths};
 use std::path::PathBuf;
@@ -22,7 +21,6 @@ pub async fn install_skill(
     tool_type: String,
     target_path: String,
     overwrite: bool,
-    remember_path: bool,
 ) -> Result<(), String> {
     let skills = parse_skills_from_repo_url(&repo_url)?;
     let skill = skills.iter()
@@ -59,12 +57,6 @@ pub async fn install_skill(
     }
 
     junction::create_junction(&link_path, &skill.source_path)?;
-
-    if remember_path && install_type == "global" && !target_path.is_empty() {
-        let mut config = load_config_from_disk()?;
-        config.tool_paths.insert(tool_type, target_path);
-        save_config_to_disk(&config)?;
-    }
 
     Ok(())
 }

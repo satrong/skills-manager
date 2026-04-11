@@ -21,7 +21,6 @@ export function useInstall() {
     toolType: ToolType;
     targetPath: string;
     overwrite?: boolean;
-    rememberPath?: boolean;
   }): Promise<void> {
     await invoke('install_skill', {
       skillId: params.skillId,
@@ -30,7 +29,6 @@ export function useInstall() {
       toolType: params.toolType,
       targetPath: params.targetPath,
       overwrite: params.overwrite ?? false,
-      rememberPath: params.rememberPath ?? false,
     });
   }
 

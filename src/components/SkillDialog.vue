@@ -24,7 +24,6 @@ const installType = ref<InstallType>('global');
 const toolType = ref<ToolType>(defaultToolType.value);
 const targetPath = ref('');
 const projectPath = ref('');
-const rememberPath = ref(false);
 const loading = ref(false);
 const error = ref('');
 const overwriteConfirm = ref(false);
@@ -142,7 +141,6 @@ async function handleInstall() {
       toolType: toolType.value,
       targetPath: resolvedTargetPath,
       overwrite: overwriteConfirm.value,
-      rememberPath: rememberPath.value,
     });
 
     if (installType.value === 'project' && projectPath.value) {
@@ -208,16 +206,12 @@ async function selectFolder() {
         </select>
       </div>
 
-      <div v-if="installType === 'global'" class="section">
-        <label class="path-label">技能目录路径</label>
+      <div v-if="installType === 'global'" class="section install-section">
+        <label>技能目录路径</label>
         <input v-model="targetPath" type="text" placeholder="工具技能目录路径" :disabled="!isCustomTool" />
-        <label class="checkbox">
-          <input type="checkbox" v-model="rememberPath" />
-          记住此路径
-        </label>
       </div>
 
-      <div v-else class="section">
+      <div v-else class="section install-section">
         <label>项目路径</label>
         <div
           class="drop-zone"
@@ -307,7 +301,7 @@ h2 { margin: 0; color: var(--text-primary); }
 label { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
 .radio-group { display: flex; flex-direction: column; gap: 6px; }
 .radio { font-weight: normal; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-secondary); }
-.path-label { margin-top: 8px; }
+.install-section { min-height: 76px; }
 select, input[type="text"] {
   padding: 8px 12px;
   border: 1px solid var(--border);
@@ -334,7 +328,6 @@ input[type="text"]:disabled {
   cursor: not-allowed;
   background: var(--bg-surface-sunken);
 }
-.checkbox { font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); }
 .drop-zone {
   position: relative;
 }
