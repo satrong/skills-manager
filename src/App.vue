@@ -5,6 +5,8 @@ import type { Skill } from './types';
 import { useRepos } from './composables/useRepos';
 import { useSkills } from './composables/useSkills';
 import { useToast } from './composables/useToast';
+import { useInstall } from './composables/useInstall';
+import type { QuickInstallEntry } from './components/SkillCard.vue';
 import IconRail from './components/IconRail.vue';
 import RepoPanel from './components/RepoPanel.vue';
 import MainContent from './components/MainContent.vue';
@@ -27,6 +29,7 @@ const {
 const { clearCache } = useSkills();
 const { addToast } = useToast();
 const { loadSettings } = useSettings();
+const { installSkill } = useInstall();
 
 const selectedRepoUrl = ref<string | null>(null);
 const showAddRepo = ref(false);
@@ -91,6 +94,22 @@ async function handleRemoveRepo(url: string) {
     selectedRepoUrl.value = repos.value.length > 0 ? repos.value[0].url : null;
   }
 }
+
+async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
+  try {
+    await installSkill({
+      skillId: skill.id,
+      repoUrl: skill.repoUrl,
+      installType: entry.installType,
+      toolType: entry.toolType,
+      targetPath: entry.targetPath,
+      overwrite: true,
+    });
+    addToast('技能安装成功', 'success');
+  } catch (e) {
+    addToast(String(e), 'error');
+  }
+}
 </script>
 
 <template>
@@ -108,6 +127,7 @@ async function handleRemoveRepo(url: string) {
       :repo-url="selectedRepoUrl"
       @install-skill="selectedSkill = $event"
       @update-repo="handleUpdateRepo"
+      @quick-install-skill="handleQuickInstall"
     />
   </div>
 

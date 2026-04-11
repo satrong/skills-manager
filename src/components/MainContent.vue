@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import type { Repo, Skill } from '../types';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import type { Repo, Skill, ToolType } from '../types';
 import { useSkills } from '../composables/useSkills';
 import { useRepos } from '../composables/useRepos';
 import { parseRepoUrl } from '../utils/repo';
 import SkillCard from './SkillCard.vue';
+import type { QuickInstallEntry } from './SkillCard.vue';
 import { RefreshCw, Loader2, Inbox, Copy, Check } from 'lucide-vue-next';
+import { invoke } from '@tauri-apps/api/core';
+import { useSettings } from '../composables/useSettings';
+import { TOOL_LABELS } from '../utils/toolPaths';
 
 const props = defineProps<{
   repoUrl: string | null;
@@ -14,13 +18,49 @@ const props = defineProps<{
 const emit = defineEmits<{
   installSkill: [skill: Skill];
   updateRepo: [url: string];
+  quickInstallSkill: [skill: Skill, entry: QuickInstallEntry];
 }>();
 
 const { repos } = useRepos();
 const { loadSkills } = useSkills();
+const { defaultToolType } = useSettings();
 
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
+const quickInstallEntries = ref<QuickInstallEntry[]>([]);
+const openDropdownId = ref<string | null>(null);
+
+onMounted(async () => {
+  try {
+    const config = await invoke<{
+      toolPaths: Record<string, string>;
+      projectPaths: string[];
+    }>('load_config');
+    const entries: QuickInstallEntry[] = [];
+    if (config.projectPaths?.length) {
+      for (const p of config.projectPaths) {
+        const tool = defaultToolType.value;
+        entries.push({
+          label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
+          installType: 'project',
+          toolType: tool,
+          targetPath: p,
+        });
+      }
+    }
+    if (config.toolPaths) {
+      for (const [tool, path] of Object.entries(config.toolPaths)) {
+        entries.push({
+          label: `全局安装 (${TOOL_LABELS[tool as ToolType] || tool})`,
+          installType: 'global',
+          toolType: tool as ToolType,
+          targetPath: path,
+        });
+      }
+    }
+    quickInstallEntries.value = entries;
+  } catch { /* ignore */ }
+});
 
 const currentRepo = ref<Repo | null>(null);
 const copied = ref(false);
@@ -56,6 +96,12 @@ watch(
   },
   { immediate: true }
 );
+
+function onDocumentClick() {
+  if (openDropdownId.value) openDropdownId.value = null;
+}
+onMounted(() => document.addEventListener('click', onDocumentClick));
+onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 </script>
 
 <template>
@@ -108,7 +154,11 @@ watch(
           v-for="skill in skills"
           :key="skill.id"
           :skill="skill"
+          :quick-install-entries="quickInstallEntries"
+          :open-dropdown="openDropdownId === skill.id"
           @install="emit('installSkill', $event)"
+          @quick-install="(skill, entry) => emit('quickInstallSkill', skill, entry)"
+          @toggle-dropdown="openDropdownId = openDropdownId === skill.id ? null : skill.id"
         />
       </div>
     </template>
