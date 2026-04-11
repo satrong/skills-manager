@@ -71,11 +71,18 @@ watch(toolType, async (tool) => {
 }, { immediate: true });
 
 watch(installType, async (type) => {
+  error.value = '';
+  overwriteConfirm.value = false;
   if (type === 'global') {
     targetPath.value = await getToolPath(toolType.value);
   } else {
     targetPath.value = '';
   }
+});
+
+watch([toolType, targetPath, projectPath], () => {
+  error.value = '';
+  overwriteConfirm.value = false;
 });
 
 const isWindows = navigator.userAgent.includes('Windows');
