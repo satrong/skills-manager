@@ -124,10 +124,13 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   width: 260px;
   min-width: 260px;
   height: 100%;
-  background: var(--bg-surface);
+  background: var(--panel-bg);
   border-right: 1px solid var(--border);
+  box-shadow: var(--panel-shadow);
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 .panel-header {
   padding: 12px 14px;
@@ -186,7 +189,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
 }
 .repo-item.selected {
   background: var(--bg-surface-hover);
-  box-shadow: inset 3px 0 0 var(--primary);
+  box-shadow: inset 3px 0 0 var(--primary), var(--inset-shadow);
 }
 
 /* Status indicator dot */
@@ -248,7 +251,7 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   flex-shrink: 0;
 }
 .repo-time {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }

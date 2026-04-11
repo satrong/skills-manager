@@ -182,7 +182,8 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  background: var(--bg-app);
+  background: var(--content-bg);
+  position: relative;
 }
 .content-header {
   display: flex;

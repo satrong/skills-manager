@@ -96,15 +96,19 @@ function pathDisplay(targetPath: string) {
   border-radius: 8px;
   padding: 14px;
   cursor: pointer;
-  background: var(--bg-surface);
+  background: var(--card-bg);
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   gap: 6px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: var(--card-shadow);
 }
 .skill-card:hover {
   border-color: var(--primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--card-hover-shadow);
+  background: var(--card-hover-bg);
+
 }
 .skill-name {
   font-weight: 600;

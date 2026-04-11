@@ -50,12 +50,15 @@ const themeTitle = {
   width: 56px;
   min-width: 56px;
   height: 100%;
-  background: var(--bg-surface-sunken);
+  background: var(--rail-bg);
   border-right: 1px solid var(--border);
+  box-shadow: var(--panel-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 12px 0;
+  position: relative;
+  z-index: 2;
 }
 .rail-top {
   display: flex;
@@ -70,6 +73,7 @@ const themeTitle = {
   color: #FF7A27;
   align-items: center;
   justify-content: center;
+  filter: drop-shadow(0 1px 2px rgba(255, 122, 39, 0.25));
 }
 .rail-bottom {
   margin-top: auto;
@@ -94,5 +98,6 @@ const themeTitle = {
 .theme-btn:hover {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 </style>
