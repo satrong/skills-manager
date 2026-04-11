@@ -1,4 +1,4 @@
-use crate::models::AppConfig;
+use crate::models::{AppConfig, FavoriteEntry};
 use crate::utils::paths;
 use std::fs;
 
@@ -99,5 +99,32 @@ pub async fn clear_project_paths() -> Result<(), String> {
 pub async fn clear_tool_paths() -> Result<(), String> {
     let mut config = load_config_from_disk()?;
     config.tool_paths.clear();
+    save_config_to_disk(&config)
+}
+
+#[tauri::command]
+pub async fn list_favorites() -> Result<Vec<FavoriteEntry>, String> {
+    let config = load_config_from_disk()?;
+    Ok(config.favorites)
+}
+
+#[tauri::command]
+pub async fn add_favorite(skill_id: String, repo_url: String) -> Result<(), String> {
+    let mut config = load_config_from_disk()?;
+    let entry = FavoriteEntry {
+        skill_id,
+        repo_url,
+    };
+    if config.favorites.iter().any(|f| f.skill_id == entry.skill_id && f.repo_url == entry.repo_url) {
+        return Ok(());
+    }
+    config.favorites.push(entry);
+    save_config_to_disk(&config)
+}
+
+#[tauri::command]
+pub async fn remove_favorite(skill_id: String, repo_url: String) -> Result<(), String> {
+    let mut config = load_config_from_disk()?;
+    config.favorites.retain(|f| !(f.skill_id == skill_id && f.repo_url == repo_url));
     save_config_to_disk(&config)
 }

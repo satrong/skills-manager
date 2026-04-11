@@ -35,6 +35,13 @@ pub struct Skill {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct FavoriteEntry {
+    pub skill_id: String,
+    pub repo_url: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AppConfig {
     #[serde(default)]
     pub repos: Vec<Repo>,
@@ -44,6 +51,8 @@ pub struct AppConfig {
     pub project_paths: Vec<String>,
     #[serde(default)]
     pub default_tool_type: Option<String>,
+    #[serde(default)]
+    pub favorites: Vec<FavoriteEntry>,
 }
 
 impl Default for AppConfig {
@@ -53,6 +62,7 @@ impl Default for AppConfig {
             tool_paths: std::collections::HashMap::new(),
             project_paths: vec![],
             default_tool_type: Some("claude-code".to_string()),
+            favorites: vec![],
         }
     }
 }

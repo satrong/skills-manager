@@ -37,6 +37,10 @@ pub fn run() {
             install::install_skill,
             install::uninstall_skill,
             install::check_junction_exists,
+            // 收藏
+            config::list_favorites,
+            config::add_favorite,
+            config::remove_favorite,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
