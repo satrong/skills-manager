@@ -36,8 +36,8 @@
 
 .theme-dark {
   color-scheme: dark;
-  --bg-app: #171717;
-  --bg-surface: #1F2025;
+  --bg-app: #1F2025;
+  --bg-surface: #171717;
   --bg-surface-sunken: #121215;
   --bg-surface-hover: #292a30;
   --bg-scrim: rgba(0, 0, 0, 0.7);
@@ -55,8 +55,8 @@
   --danger-light: #450a0a;
   --success: #22c55e;
   --success-light: #052e16;
-  --rail-bg: linear-gradient(180deg, #111113 0%, #141416 100%);
-  --panel-bg: linear-gradient(180deg, #1b1c20 0%, #171717 100%);
+  --rail-bg: linear-gradient(180deg, #27282f 0%, #22232a 100%);
+  --panel-bg: linear-gradient(180deg, #22232a 0%, #1c1d23 100%);
   --content-bg: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(183, 67, 4, 0.06) 0%, transparent 60%), radial-gradient(ellipse 50% 80% at 80% 100%, rgba(31, 32, 37, 0.5) 0%, transparent 70%), linear-gradient(180deg, #1c1d22 0%, #171717 100%);
   --card-bg: rgba(31, 32, 37, 0.65);
   --card-hover-bg: rgba(41, 42, 48, 0.8);

@@ -125,7 +125,6 @@ const repoList = computed(() => repos.value.map(r => ({ ...r, meta: parseRepoUrl
   min-width: 260px;
   height: 100%;
   background: var(--panel-bg);
-  border-right: 1px solid var(--border);
   box-shadow: var(--panel-shadow);
   display: flex;
   flex-direction: column;
