@@ -35,6 +35,16 @@ function handleQuickInstall(entry: QuickInstallEntry) {
   emit('toggleDropdown');
   emit('quickInstall', props.skill, entry);
 }
+
+function pathDisplay(targetPath: string) {
+  const normalized = targetPath.replace(/\/+$/, '');
+  const lastSlash = normalized.lastIndexOf('/');
+  if (lastSlash <= 0) return { title: normalized, subtitle: '' };
+  return {
+    title: normalized.substring(lastSlash + 1),
+    subtitle: normalized.substring(0, lastSlash + 1),
+  };
+}
 </script>
 
 <template>
@@ -70,8 +80,8 @@ function handleQuickInstall(entry: QuickInstallEntry) {
               class="dropdown-item"
               @click.stop="handleQuickInstall(entry)"
             >
-              <span class="item-label">{{ entry.label }}</span>
-              <span class="item-path">{{ entry.targetPath }}</span>
+              <span class="item-label">{{ pathDisplay(entry.targetPath).title }}</span>
+              <span class="item-path">{{ pathDisplay(entry.targetPath).subtitle }}</span>
             </button>
           </template>
         </div>

@@ -27,45 +27,50 @@ const { defaultToolType } = useSettings();
 
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
-const quickInstallEntries = ref<QuickInstallEntry[]>([]);
 const openDropdownId = ref<string | null>(null);
+
+const configData = ref<{ toolPaths: Record<string, string>; projectPaths: string[] } | null>(null);
+
+const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
+  if (!configData.value) return [];
+  const entries: QuickInstallEntry[] = [];
+  if (configData.value.projectPaths?.length) {
+    const tool = defaultToolType.value;
+    entries.push({
+      label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
+      installType: 'project',
+      toolType: tool,
+      targetPath: '',
+      header: true,
+    });
+    for (const p of configData.value.projectPaths) {
+      entries.push({
+        label: '',
+        installType: 'project',
+        toolType: tool,
+        targetPath: p,
+      });
+    }
+  }
+  if (configData.value.toolPaths) {
+    for (const [tool, path] of Object.entries(configData.value.toolPaths)) {
+      entries.push({
+        label: `全局安装 (${TOOL_LABELS[tool as ToolType] || tool})`,
+        installType: 'global',
+        toolType: tool as ToolType,
+        targetPath: path,
+      });
+    }
+  }
+  return entries;
+});
 
 onMounted(async () => {
   try {
-    const config = await invoke<{
+    configData.value = await invoke<{
       toolPaths: Record<string, string>;
       projectPaths: string[];
     }>('load_config');
-    const entries: QuickInstallEntry[] = [];
-    if (config.projectPaths?.length) {
-      const tool = defaultToolType.value;
-      entries.push({
-        label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
-        installType: 'project',
-        toolType: tool,
-        targetPath: '',
-        header: true,
-      });
-      for (const p of config.projectPaths) {
-        entries.push({
-          label: '',
-          installType: 'project',
-          toolType: tool,
-          targetPath: p,
-        });
-      }
-    }
-    if (config.toolPaths) {
-      for (const [tool, path] of Object.entries(config.toolPaths)) {
-        entries.push({
-          label: `全局安装 (${TOOL_LABELS[tool as ToolType] || tool})`,
-          installType: 'global',
-          toolType: tool as ToolType,
-          targetPath: path,
-        });
-      }
-    }
-    quickInstallEntries.value = entries;
   } catch { /* ignore */ }
 });
 
