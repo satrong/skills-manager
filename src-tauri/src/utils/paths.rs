@@ -56,10 +56,10 @@ pub fn default_tool_path(tool: &str) -> Option<String> {
 /// 获取工具在项目中的配置目录（相对于项目根目录）
 pub fn project_tool_dir(tool: &str) -> Option<String> {
     let path = match tool {
-        "claude-code" => PathBuf::from(".claude"),
+        "claude-code" => PathBuf::from(".claude").join("skills"),
         "cursor" => PathBuf::from(".cursor").join("rules"),
-        "codex" => PathBuf::from(".codex"),
-        "opencode" => PathBuf::from(".opencode"),
+        "codex" => PathBuf::from(".codex").join("skills"),
+        "opencode" => PathBuf::from(".opencode").join("skills"),
         "qoder" => PathBuf::from(".qoder").join("rules"),
         "kilo" => PathBuf::from(".kilocode").join("rules"),
         _ => return None,

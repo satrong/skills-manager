@@ -22,10 +22,10 @@ export const DEFAULT_TOOL_PATHS: Record<Exclude<ToolType, 'custom'>, string> = {
 
 // 各工具在项目中的配置目录（相对于项目根目录）
 export const PROJECT_TOOL_DIRS: Record<Exclude<ToolType, 'custom'>, string> = {
-  'claude-code': '.claude',
+  'claude-code': '.claude\\skills',
   'cursor': '.cursor\\rules',
-  'codex': '.codex',
-  'opencode': '.opencode',
+  'codex': '.codex\\skills',
+  'opencode': '.opencode\\skills',
   'qoder': '.qoder\\rules',
   'kilo': '.kilocode\\rules',
 };
