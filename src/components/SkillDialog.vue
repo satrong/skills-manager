@@ -261,7 +261,7 @@ async function selectFolder() {
       </div>
 
       <div class="preview">
-        <span>安装到:</span>
+        <span>将安装到:</span>
         <code>{{ previewPath }}</code>
       </div>
 
@@ -456,7 +456,7 @@ input[type="text"]:disabled {
   gap: 4px;
 }
 .preview span { color: var(--text-secondary); }
-.preview code { word-break: break-all; color: var(--text-primary); }
+.preview code { word-break: break-all; color: var(--text-primary); font-size: 0.875em; }
 .error-box {
   background: var(--danger-light);
   border-radius: 6px;
