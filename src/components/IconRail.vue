@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { useTheme } from '../composables/useTheme';
-import { Sun, Moon } from 'lucide-vue-next';
+import { Sun, Moon, Settings } from 'lucide-vue-next';
 
 const { resolvedTheme, cycleTheme } = useTheme();
+
+defineEmits<{
+  settings: [];
+}>();
 
 const themeIcon = {
   light: Sun,
@@ -33,6 +37,9 @@ const themeTitle = {
         :title="themeTitle[resolvedTheme]"
       >
         <component :is="themeIcon[resolvedTheme]" :size="18" />
+      </button>
+      <button class="theme-btn" title="设置" @click="$emit('settings')">
+        <Settings :size="18" />
       </button>
     </div>
   </div>

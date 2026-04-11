@@ -40,4 +40,5 @@ export interface InstallRequest {
 export interface AppConfig {
   repos: Omit<Repo, 'skills'>[];
   toolPaths: Partial<Record<ToolType, string>>;
+  defaultToolType?: ToolType | null;
 }

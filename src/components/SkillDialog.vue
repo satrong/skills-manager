@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Skill, InstallType, ToolType } from '../types';
 import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
+import { useSettings } from '../composables/useSettings';
 import { listen, type UnlistenFn, TauriEvent } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -17,9 +18,10 @@ const emit = defineEmits<{
 }>();
 
 const { getToolPath, installSkill } = useInstall();
+const { defaultToolType } = useSettings();
 
 const installType = ref<InstallType>('global');
-const toolType = ref<ToolType>('claude-code');
+const toolType = ref<ToolType>(defaultToolType.value ?? 'claude-code');
 const targetPath = ref('');
 const projectPath = ref('');
 const rememberPath = ref(false);

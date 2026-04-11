@@ -11,6 +11,8 @@ import MainContent from './components/MainContent.vue';
 import Toast from './components/Toast.vue';
 import RepoManager from './components/RepoManager.vue';
 import SkillDialog from './components/SkillDialog.vue';
+import SettingsDialog from './components/SettingsDialog.vue';
+import { useSettings } from './composables/useSettings';
 
 const {
   repos,
@@ -24,9 +26,11 @@ const {
 
 const { clearCache } = useSkills();
 const { addToast } = useToast();
+const { loadSettings } = useSettings();
 
 const selectedRepoUrl = ref<string | null>(null);
 const showAddRepo = ref(false);
+const showSettings = ref(false);
 const selectedSkill = ref<Skill | null>(null);
 
 // Watch for errors and show toast
@@ -35,7 +39,7 @@ watch(reposError, (err) => {
 });
 
 onMounted(async () => {
-  await loadRepos();
+  await Promise.all([loadRepos(), loadSettings()]);
   if (repos.value.length > 0) {
     selectedRepoUrl.value = repos.value[0].url;
   }
@@ -91,7 +95,7 @@ async function handleRemoveRepo(url: string) {
 
 <template>
   <div class="app-layout">
-    <IconRail />
+    <IconRail @settings="showSettings = true" />
     <RepoPanel
       :selected-repo-url="selectedRepoUrl"
       @select="selectedRepoUrl = $event"
@@ -108,6 +112,10 @@ async function handleRemoveRepo(url: string) {
   </div>
 
   <!-- Modals -->
+  <SettingsDialog
+    v-if="showSettings"
+    @close="showSettings = false"
+  />
   <RepoManager
     v-if="showAddRepo"
     @add="handleAddRepo"
