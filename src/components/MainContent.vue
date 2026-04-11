@@ -24,7 +24,7 @@ const emit = defineEmits<{
 const { repos } = useRepos();
 const { skillsByRepo, loadSkills } = useSkills();
 const { defaultToolType, projectPaths, loadProjectPaths, removeProjectPath } = useSettings();
-const { favorites, isFavorite, toggleFavorite, loadFavorites } = useFavorites();
+const { favorites, isFavorite, toggleFavorite } = useFavorites();
 
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
@@ -75,7 +75,6 @@ onMounted(async () => {
     toolPathsConfig.value = config.toolPaths;
   } catch { /* ignore */ }
   await loadProjectPaths();
-  await loadFavorites();
 });
 
 const currentRepo = ref<Repo | null>(null);
