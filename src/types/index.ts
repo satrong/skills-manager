@@ -38,10 +38,16 @@ export interface InstallRequest {
   targetPath: string;
 }
 
+export interface FavoriteEntry {
+  skillId: string;
+  repoUrl: string;
+}
+
 export interface AppConfig {
   repos: Omit<Repo, 'skills'>[];
   toolPaths: Partial<Record<ToolType, string>>;
   defaultToolType?: ToolType | null;
+  favorites: FavoriteEntry[];
 }
 
 export interface SearchResult {
