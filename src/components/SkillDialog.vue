@@ -6,7 +6,6 @@ import { useInstall } from '../composables/useInstall';
 import { useSettings } from '../composables/useSettings';
 import { listen, type UnlistenFn, TauriEvent } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
-import { invoke } from '@tauri-apps/api/core';
 
 const props = defineProps<{
   skill: Skill;
@@ -18,7 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const { getToolPath, installSkill } = useInstall();
-const { defaultToolType } = useSettings();
+const { defaultToolType, projectPaths, addProjectPath, removeProjectPath } = useSettings();
 
 const installType = ref<InstallType>('global');
 const toolType = ref<ToolType>(defaultToolType.value);
@@ -28,7 +27,6 @@ const loading = ref(false);
 const error = ref('');
 const overwriteConfirm = ref(false);
 const isDragging = ref(false);
-const projectPaths = ref<string[]>([]);
 const showPathDropdown = ref(false);
 
 const unlistenFns: UnlistenFn[] = [];
@@ -51,10 +49,6 @@ onMounted(async () => {
     isDragging.value = false;
   });
   unlistenFns.push(unlistenDrop, unlistenEnter, unlistenLeave);
-
-  try {
-    projectPaths.value = await invoke<string[]>('get_project_paths');
-  } catch { /* ignore */ }
 });
 
 onUnmounted(() => {
@@ -100,11 +94,10 @@ function selectProjectPath(path: string) {
   showPathDropdown.value = false;
 }
 
-async function removeProjectPath(path: string, event: MouseEvent) {
+async function handleRemoveProjectPath(path: string, event: MouseEvent) {
   event.stopPropagation();
   try {
-    await invoke('remove_project_path', { path });
-    projectPaths.value = projectPaths.value.filter(p => p !== path);
+    await removeProjectPath(path);
   } catch { /* ignore */ }
 }
 
@@ -153,7 +146,7 @@ async function handleInstall() {
 
     if (installType.value === 'project' && projectPath.value) {
       try {
-        await invoke('add_project_path', { path: projectPath.value });
+        await addProjectPath(projectPath.value);
       } catch { /* ignore */ }
     }
 
@@ -247,7 +240,7 @@ async function selectFolder() {
                   <span class="path-text">{{ p }}</span>
                   <button
                     class="path-delete-btn"
-                    @mousedown.prevent.stop="removeProjectPath(p, $event)"
+                    @mousedown.prevent.stop="handleRemoveProjectPath(p, $event)"
                     title="删除"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

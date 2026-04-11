@@ -23,18 +23,17 @@ const emit = defineEmits<{
 
 const { repos } = useRepos();
 const { loadSkills } = useSkills();
-const { defaultToolType } = useSettings();
+const { defaultToolType, projectPaths, loadProjectPaths, removeProjectPath } = useSettings();
 
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
 const openDropdownId = ref<string | null>(null);
 
-const configData = ref<{ toolPaths: Record<string, string>; projectPaths: string[] } | null>(null);
+const toolPathsConfig = ref<Record<string, string>>({});
 
 const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
-  if (!configData.value) return [];
   const entries: QuickInstallEntry[] = [];
-  if (configData.value.projectPaths?.length) {
+  if (projectPaths.value.length) {
     const tool = defaultToolType.value;
     entries.push({
       label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
@@ -43,7 +42,7 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
       targetPath: '',
       header: true,
     });
-    for (const p of configData.value.projectPaths) {
+    for (const p of projectPaths.value) {
       entries.push({
         label: '',
         installType: 'project',
@@ -52,8 +51,8 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
       });
     }
   }
-  if (configData.value.toolPaths) {
-    for (const [tool, path] of Object.entries(configData.value.toolPaths)) {
+  if (Object.keys(toolPathsConfig.value).length) {
+    for (const [tool, path] of Object.entries(toolPathsConfig.value)) {
       entries.push({
         label: `全局安装 (${TOOL_LABELS[tool as ToolType] || tool})`,
         installType: 'global',
@@ -67,11 +66,13 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
 
 onMounted(async () => {
   try {
-    configData.value = await invoke<{
+    const config = await invoke<{
       toolPaths: Record<string, string>;
       projectPaths: string[];
     }>('load_config');
+    toolPathsConfig.value = config.toolPaths;
   } catch { /* ignore */ }
+  await loadProjectPaths();
 });
 
 const currentRepo = ref<Repo | null>(null);
@@ -116,10 +117,7 @@ function onDocumentClick() {
 async function removeQuickInstallEntry(entry: QuickInstallEntry) {
   if (entry.installType === 'project') {
     try {
-      await invoke('remove_project_path', { path: entry.targetPath });
-      if (configData.value) {
-        configData.value.projectPaths = configData.value.projectPaths.filter(p => p !== entry.targetPath);
-      }
+      await removeProjectPath(entry.targetPath);
     } catch { /* ignore */ }
   }
 }

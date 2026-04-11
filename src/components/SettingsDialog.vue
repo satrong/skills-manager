@@ -9,7 +9,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { defaultToolType, setDefaultToolType } = useSettings();
+const { defaultToolType, setDefaultToolType, clearProjectPaths } = useSettings();
 
 const selected = ref<ToolType>(defaultToolType.value);
 const projectPathCount = ref<number | null>(null);
@@ -38,7 +38,7 @@ async function handleClearAll() {
   clearing.value = true;
   try {
     await Promise.all([
-      invoke('clear_project_paths'),
+      clearProjectPaths(),
       invoke('clear_tool_paths'),
     ]);
     projectPathCount.value = 0;
