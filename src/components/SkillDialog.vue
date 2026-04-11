@@ -4,6 +4,7 @@ import type { Skill, InstallType, ToolType } from '../types';
 import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
 import { listen, type UnlistenFn, TauriEvent } from '@tauri-apps/api/event';
+import { open } from '@tauri-apps/plugin-dialog';
 
 const props = defineProps<{
   skill: Skill;
@@ -133,6 +134,13 @@ async function handleOverwrite() {
   overwriteConfirm.value = true;
   await handleInstall();
 }
+
+async function selectFolder() {
+  const selected = await open({ directory: true, title: '选择项目目录' });
+  if (typeof selected === 'string') {
+    projectPath.value = selected;
+  }
+}
 </script>
 
 <template>
@@ -181,11 +189,16 @@ async function handleOverwrite() {
           @dragover.prevent
           @drop.prevent
         >
-          <input
-            v-model="projectPath"
-            type="text"
-            :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
-          />
+          <div class="path-row">
+            <input
+              v-model="projectPath"
+              type="text"
+              :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
+            />
+            <button type="button" class="browse-btn" @click="selectFolder" title="选择文件夹">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </button>
+          </div>
           <div v-if="isDragging" class="drop-overlay">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 11 15 14"/></svg>
             <span>松开以设置项目路径</span>
@@ -273,6 +286,30 @@ input[type="text"]:disabled {
 .checkbox { font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); }
 .drop-zone {
   position: relative;
+}
+.path-row {
+  display: flex;
+  gap: 8px;
+}
+.path-row input[type="text"] {
+  flex: 1;
+}
+.browse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.browse-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 .drop-zone-active input[type="text"] {
   border-color: var(--primary);
