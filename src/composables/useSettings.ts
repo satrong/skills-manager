@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { ToolType } from '../types';
 
-const defaultToolType = ref<ToolType | null>(null);
+const defaultToolType = ref<ToolType>('claude-code');
 let loaded = false;
 
 async function loadSettings() {
@@ -10,13 +10,13 @@ async function loadSettings() {
   loaded = true;
   try {
     const result = await invoke<string | null>('get_default_tool_type');
-    defaultToolType.value = result as ToolType | null;
+    defaultToolType.value = (result as ToolType | null) ?? 'claude-code';
   } catch {
-    defaultToolType.value = null;
+    defaultToolType.value = 'claude-code';
   }
 }
 
-async function setDefaultToolType(toolType: ToolType | null) {
+async function setDefaultToolType(toolType: ToolType) {
   await invoke('set_default_tool_type', { toolType });
   defaultToolType.value = toolType;
 }

@@ -21,7 +21,7 @@ const { getToolPath, installSkill } = useInstall();
 const { defaultToolType } = useSettings();
 
 const installType = ref<InstallType>('global');
-const toolType = ref<ToolType>(defaultToolType.value ?? 'claude-code');
+const toolType = ref<ToolType>(defaultToolType.value);
 const targetPath = ref('');
 const projectPath = ref('');
 const rememberPath = ref(false);

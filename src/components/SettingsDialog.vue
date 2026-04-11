@@ -10,16 +10,14 @@ const emit = defineEmits<{
 
 const { defaultToolType, setDefaultToolType } = useSettings();
 
-const selected = ref<ToolType | ''>(defaultToolType.value ?? '');
+const selected = ref<ToolType>(defaultToolType.value);
 
-const tools: { value: ToolType | ''; label: string }[] = [
-  { value: '', label: '不设置默认' },
-  ...(Object.entries(TOOL_LABELS) as [ToolType, string][]).map(([value, label]) => ({ value, label })),
-];
+const tools: { value: ToolType; label: string }[] = (
+  Object.entries(TOOL_LABELS) as [ToolType, string][]
+).map(([value, label]) => ({ value, label }));
 
 function handleSave() {
-  const val = selected.value === '' ? null : selected.value;
-  setDefaultToolType(val as ToolType | null);
+  setDefaultToolType(selected.value);
   emit('close');
 }
 </script>

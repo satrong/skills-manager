@@ -44,7 +44,7 @@ impl Default for AppConfig {
             repos: vec![],
             tool_paths: std::collections::HashMap::new(),
             project_paths: vec![],
-            default_tool_type: None,
+            default_tool_type: Some("claude-code".to_string()),
         }
     }
 }
