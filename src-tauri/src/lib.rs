@@ -31,6 +31,7 @@ pub fn run() {
             repo::list_repos,
             // 技能
             skill::list_skills,
+            skill::search_skills,
             // 安装
             install::install_skill,
             install::uninstall_skill,

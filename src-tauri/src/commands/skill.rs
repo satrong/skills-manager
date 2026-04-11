@@ -1,5 +1,6 @@
 use crate::models::{Skill, SkillIndex};
 use crate::commands::config::load_config_from_disk;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -121,6 +122,18 @@ fn scan_skills_from_skill_md(repo_dir: &Path, repo_url: &str) -> Vec<Skill> {
     skills
 }
 
+pub(crate) fn count_skills_from_repo(repo_dir: &Path, _repo_url: &str) -> u32 {
+    let index_file = repo_dir.join("skills.json");
+    if index_file.exists() {
+        if let Ok(content) = fs::read_to_string(&index_file) {
+            if let Ok(index) = serde_json::from_str::<SkillIndex>(&content) {
+                return index.skills.len() as u32;
+            }
+        }
+    }
+    find_skill_md_files(repo_dir).len() as u32
+}
+
 /// 供 install.rs 内部调用的辅助函数
 pub(crate) fn parse_skills_from_repo_url(repo_url: &str) -> Result<Vec<Skill>, String> {
     let config = load_config_from_disk()?;
@@ -136,4 +149,46 @@ pub(crate) fn parse_skills_from_repo_url(repo_url: &str) -> Result<Vec<Skill>, S
 #[tauri::command]
 pub async fn list_skills(repo_url: String) -> Result<Vec<Skill>, String> {
     parse_skills_from_repo_url(&repo_url)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SearchResult {
+    pub skill: Skill,
+    pub repo_name: String,
+    pub repo_url: String,
+}
+
+#[tauri::command]
+pub async fn search_skills(query: String) -> Result<Vec<SearchResult>, String> {
+    let query = query.to_lowercase();
+    let config = load_config_from_disk()?;
+
+    let mut results = Vec::new();
+
+    for repo in &config.repos {
+        if !repo.local_path.exists() {
+            continue;
+        }
+
+        let skills = parse_skills_from_repo(&repo.local_path, &repo.url);
+
+        for skill in skills {
+            let name_match = skill.name.to_lowercase().contains(&query);
+            let desc_match = skill.description.to_lowercase().contains(&query);
+            let tag_match = skill.tags.as_ref().map_or(false, |tags| {
+                tags.iter().any(|t| t.to_lowercase().contains(&query))
+            });
+
+            if name_match || desc_match || tag_match {
+                results.push(SearchResult {
+                    skill,
+                    repo_name: repo.name.clone(),
+                    repo_url: repo.url.clone(),
+                });
+            }
+        }
+    }
+
+    Ok(results)
 }

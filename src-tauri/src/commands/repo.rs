@@ -1,6 +1,7 @@
 use crate::models::Repo;
 use crate::utils::{git, paths};
 use crate::commands::config::{load_config_from_disk, save_config_to_disk};
+use crate::commands::skill::count_skills_from_repo;
 use std::fs;
 use std::path::PathBuf;
 
@@ -36,11 +37,14 @@ pub async fn add_repo(url: String) -> Result<Repo, String> {
         name: dir_name,
         last_update: now_timestamp(),
         source: "git".to_string(),
+        skill_count: None,
     };
 
     config.repos.push(repo.clone());
     save_config_to_disk(&config)?;
 
+    let mut repo = repo;
+    repo.skill_count = Some(count_skills_from_repo(&repo.local_path, &repo.url));
     Ok(repo)
 }
 
@@ -78,11 +82,14 @@ pub async fn add_local_dir(path: String) -> Result<Repo, String> {
         name: dir_name,
         last_update: now_timestamp(),
         source: "local".to_string(),
+        skill_count: None,
     };
 
     config.repos.push(repo.clone());
     save_config_to_disk(&config)?;
 
+    let mut repo = repo;
+    repo.skill_count = Some(count_skills_from_repo(&repo.local_path, &repo.url));
     Ok(repo)
 }
 
@@ -163,5 +170,14 @@ pub async fn update_all_repos() -> Result<Vec<String>, String> {
 #[tauri::command]
 pub async fn list_repos() -> Result<Vec<Repo>, String> {
     let config = load_config_from_disk()?;
-    Ok(config.repos)
+    let repos = config.repos.into_iter().map(|mut repo| {
+        let count = if repo.local_path.exists() {
+            count_skills_from_repo(&repo.local_path, &repo.url)
+        } else {
+            0
+        };
+        repo.skill_count = Some(count);
+        repo
+    }).collect();
+    Ok(repos)
 }

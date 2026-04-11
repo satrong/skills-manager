@@ -23,7 +23,7 @@ export function useRepos() {
     error.value = null;
     try {
       const result = await invoke<Repo[]>('list_repos');
-      repos.value = result.map(r => ({ ...r, skills: [] }));
+      repos.value = result;
     } catch (e) {
       error.value = String(e);
     } finally {
@@ -42,15 +42,13 @@ export function useRepos() {
       name: extractRepoName(url),
       lastUpdate: '',
       source: 'git',
-      skills: [],
     });
 
     try {
       const repo = await invoke<Repo>('add_repo', { url });
-      // Replace placeholder with real data
       const index = repos.value.findIndex(r => r.url === url);
       if (index !== -1) {
-        repos.value[index] = { ...repo, skills: [] };
+        repos.value[index] = repo;
       }
     } catch (e) {
       // Remove placeholder on error
@@ -74,14 +72,13 @@ export function useRepos() {
       name: dirName,
       lastUpdate: '',
       source: 'local',
-      skills: [],
     });
 
     try {
       const repo = await invoke<Repo>('add_local_dir', { path });
       const index = repos.value.findIndex(r => r.source === 'local' && r.name === dirName && !r.url);
       if (index !== -1) {
-        repos.value[index] = { ...repo, skills: [] };
+        repos.value[index] = repo;
       }
     } catch (e) {
       repos.value = repos.value.filter(r => !(r.source === 'local' && r.name === dirName && !r.url));

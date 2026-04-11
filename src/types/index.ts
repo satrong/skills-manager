@@ -16,6 +16,7 @@ export interface Repo {
   lastUpdate: string;
   source: 'git' | 'local';
   skills?: Skill[];
+  skillCount?: number;
 }
 
 export interface Skill {
@@ -41,4 +42,10 @@ export interface AppConfig {
   repos: Omit<Repo, 'skills'>[];
   toolPaths: Partial<Record<ToolType, string>>;
   defaultToolType?: ToolType | null;
+}
+
+export interface SearchResult {
+  skill: Skill;
+  repoName: string;
+  repoUrl: string;
 }

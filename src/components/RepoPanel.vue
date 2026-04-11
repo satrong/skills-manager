@@ -70,6 +70,7 @@ const repoList = computed(() => repos.value.map(r => ({
             <div class="repo-subtitle">
               <Folder v-if="repo.isLocal" :size="12" class="local-folder-icon" />
               {{ repo.isLocal ? '本地目录' : repo.meta.name }}
+              <span v-if="repo.skillCount != null" class="skill-count">{{ repo.skillCount }}</span>
             </div>
           </div>
           <div class="repo-meta" v-if="repo.isLocal">
@@ -258,6 +259,32 @@ const repoList = computed(() => repos.value.map(r => ({
 }
 .repo-item.selected .repo-subtitle {
   color: var(--text-secondary);
+}
+
+.skill-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+  vertical-align: middle;
+  line-height: 1;
+}
+.repo-item:hover .skill-count {
+  background: color-mix(in srgb, var(--text-secondary) 15%, transparent);
+  color: var(--text-secondary);
+}
+.repo-item.selected .skill-count {
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
 }
 
 .repo-meta {

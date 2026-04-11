@@ -16,6 +16,8 @@ pub struct Repo {
     pub last_update: String,
     #[serde(default = "default_source")]
     pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub skill_count: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
