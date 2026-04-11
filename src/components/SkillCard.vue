@@ -14,6 +14,7 @@ const props = defineProps<{
   skill: Skill;
   quickInstallEntries?: QuickInstallEntry[];
   openDropdown?: boolean;
+  isFavorite?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -21,6 +22,7 @@ const emit = defineEmits<{
   quickInstall: [skill: Skill, entry: QuickInstallEntry];
   removeQuickInstallEntry: [entry: QuickInstallEntry];
   toggleDropdown: [];
+  toggleFavorite: [skill: Skill];
 }>();
 
 const hasEntries = computed(() =>
@@ -59,6 +61,11 @@ function handleRemoveEntry(entry: QuickInstallEntry, e: Event) {
   emit('removeQuickInstallEntry', entry);
 }
 
+function handleToggleFavorite(e: Event) {
+  e.stopPropagation();
+  emit('toggleFavorite', props.skill);
+}
+
 function pathDisplay(targetPath: string) {
   const normalized = targetPath.replace(/\/+$/, '');
   const lastSlash = normalized.lastIndexOf('/');
@@ -72,6 +79,9 @@ function pathDisplay(targetPath: string) {
 
 <template>
   <div class="skill-card" :class="{ 'dropdown-open': openDropdown }" @click="emit('install', props.skill)">
+    <button class="favorite-btn" :class="{ active: isFavorite }" @click="handleToggleFavorite" :title="isFavorite ? '取消收藏' : '收藏'">
+      <svg width="16" height="16" viewBox="0 0 24 24" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </button>
     <div class="skill-name">{{ skill.name }}</div>
     <div class="skill-description">{{ skill.description }}</div>
     <div class="skill-meta">
@@ -125,6 +135,7 @@ function pathDisplay(targetPath: string) {
 
 <style scoped>
 .skill-card {
+  position: relative;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px;
@@ -316,5 +327,32 @@ function pathDisplay(targetPath: string) {
 .item-delete-btn:hover {
   color: var(--danger);
   background: var(--danger-light);
+}
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  opacity: 0;
+}
+.skill-card:hover .favorite-btn,
+.favorite-btn.active {
+  opacity: 1;
+}
+.favorite-btn:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+.favorite-btn.active {
+  color: var(--primary);
 }
 </style>
