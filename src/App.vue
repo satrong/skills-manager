@@ -6,6 +6,7 @@ import { useRepos } from './composables/useRepos';
 import { useSkills } from './composables/useSkills';
 import { useToast } from './composables/useToast';
 import { useInstall } from './composables/useInstall';
+import { useFavorites } from './composables/useFavorites';
 import type { QuickInstallEntry } from './components/SkillCard.vue';
 import IconRail from './components/IconRail.vue';
 import RepoPanel from './components/RepoPanel.vue';
@@ -32,6 +33,9 @@ const { clearCache } = useSkills();
 const { addToast } = useToast();
 const { loadSettings } = useSettings();
 const { installSkill } = useInstall();
+const { loadFavorites } = useFavorites();
+
+const activeView = ref<'repos' | 'favorites'>('repos');
 
 const selectedRepoUrl = ref<string | null>(null);
 const showAddRepo = ref(false);
@@ -44,7 +48,7 @@ watch(reposError, (err) => {
 });
 
 onMounted(async () => {
-  await Promise.all([loadRepos(), loadSettings()]);
+  await Promise.all([loadRepos(), loadSettings(), loadFavorites()]);
   if (repos.value.length === 0) {
     await ensureBuiltinRepos();
     if (repos.value.length > 0) {
@@ -134,7 +138,7 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
 
 <template>
   <div class="app-layout">
-    <IconRail @settings="showSettings = true" />
+    <IconRail :active-view="activeView" @settings="showSettings = true" @favorites="activeView = 'favorites'" @repos="activeView = 'repos'; selectedRepoUrl = repos.length > 0 ? repos[0].url : null" />
     <RepoPanel
       :selected-repo-url="selectedRepoUrl"
       @select="selectedRepoUrl = $event"
@@ -145,6 +149,7 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
     />
     <MainContent
       :repo-url="selectedRepoUrl"
+      :view-mode="activeView"
       @install-skill="selectedSkill = $event"
       @quick-install-skill="handleQuickInstall"
     />
