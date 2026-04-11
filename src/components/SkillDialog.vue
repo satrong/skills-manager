@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Skill, InstallType, ToolType } from '../types';
 import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
+import { listen, type UnlistenFn, TauriEvent } from '@tauri-apps/api/event';
 
 const props = defineProps<{
   skill: Skill;
@@ -23,6 +24,33 @@ const rememberPath = ref(false);
 const loading = ref(false);
 const error = ref('');
 const overwriteConfirm = ref(false);
+const isDragging = ref(false);
+
+const unlistenFns: UnlistenFn[] = [];
+
+onMounted(async () => {
+  const unlistenDrop = await listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, (event) => {
+    isDragging.value = false;
+    if (installType.value !== 'project') return;
+    const path = event.payload.paths?.[0];
+    if (path) {
+      projectPath.value = path;
+    }
+  });
+  const unlistenEnter = await listen(TauriEvent.DRAG_ENTER, () => {
+    if (installType.value === 'project') {
+      isDragging.value = true;
+    }
+  });
+  const unlistenLeave = await listen(TauriEvent.DRAG_LEAVE, () => {
+    isDragging.value = false;
+  });
+  unlistenFns.push(unlistenDrop, unlistenEnter, unlistenLeave);
+});
+
+onUnmounted(() => {
+  unlistenFns.forEach(fn => fn());
+});
 
 const tools: { value: ToolType; label: string }[] = (
   Object.entries(TOOL_LABELS) as [ToolType, string][]
@@ -147,11 +175,23 @@ async function handleOverwrite() {
 
       <div v-else class="section">
         <label>项目路径</label>
-        <input
-          v-model="projectPath"
-          type="text"
-          :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
-        />
+        <div
+          class="drop-zone"
+          :class="{ 'drop-zone-active': isDragging }"
+          @dragover.prevent
+          @drop.prevent
+        >
+          <input
+            v-model="projectPath"
+            type="text"
+            :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
+          />
+          <div v-if="isDragging" class="drop-overlay">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 11 15 14"/></svg>
+            <span>松开以设置项目路径</span>
+          </div>
+        </div>
+        <span class="hint-text">可直接将项目文件夹拖拽到此窗口</span>
       </div>
 
       <div class="preview">
@@ -231,6 +271,33 @@ input[type="text"]:disabled {
   background: var(--bg-surface-sunken);
 }
 .checkbox { font-weight: normal; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); }
+.drop-zone {
+  position: relative;
+}
+.drop-zone-active input[type="text"] {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-surface));
+  border: 2px dashed var(--primary);
+  border-radius: 6px;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1;
+}
+.hint-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
 .preview {
   background: var(--bg-surface-sunken);
   border: 1px solid var(--border);
