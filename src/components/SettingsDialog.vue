@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import type { ToolType } from '../types';
 import { TOOL_LABELS } from '../utils/toolPaths';
 import { useSettings } from '../composables/useSettings';
+import { useI18n } from '../i18n';
 import { invoke } from '@tauri-apps/api/core';
 
 const emit = defineEmits<{
@@ -10,6 +11,7 @@ const emit = defineEmits<{
 }>();
 
 const { defaultToolType, setDefaultToolType, clearProjectPaths } = useSettings();
+const { locale, t } = useI18n();
 
 const selected = ref<ToolType>(defaultToolType.value);
 const projectPathCount = ref<number | null>(null);
@@ -56,11 +58,21 @@ function handleSave() {
 <template>
   <div class="modal-overlay" @click.self="emit('close')" tabindex="0" @keydown.escape="emit('close')">
     <div class="modal">
-      <h2>设置</h2>
+      <h2>{{ t('settings.title') }}</h2>
 
       <div class="section">
-        <label>默认目标工具</label>
-        <p class="desc">安装技能时默认选中的目标工具。</p>
+        <label>{{ t('settings.language') }}</label>
+        <p class="desc">{{ t('settings.languageDesc') }}</p>
+        <select v-model="locale">
+          <option value="auto">{{ t('settings.langAuto') }}</option>
+          <option value="zh-CN">{{ t('settings.langZhCN') }}</option>
+          <option value="en">{{ t('settings.langEn') }}</option>
+        </select>
+      </div>
+
+      <div class="section">
+        <label>{{ t('settings.defaultTool') }}</label>
+        <p class="desc">{{ t('settings.defaultToolDesc') }}</p>
         <select v-model="selected">
           <option v-for="tool in tools" :key="tool.value" :value="tool.value">
             {{ tool.label }}
@@ -69,22 +81,22 @@ function handleSave() {
       </div>
 
       <div class="section">
-        <label>路径历史</label>
+        <label>{{ t('settings.pathHistory') }}</label>
         <p class="desc">
-          安装技能时的路径记录（项目路径 {{ projectPathCount ?? '...' }} 条，工具路径 {{ toolPathCount ?? '...' }} 条）。
+          {{ t('settings.pathHistoryDesc', { projectCount: projectPathCount ?? '...', toolPathCount: toolPathCount ?? '...' }) }}
         </p>
         <button
           class="danger-btn"
           :disabled="clearing || totalCount === 0"
           @click="handleClearAll"
         >
-          {{ clearing ? '清空中...' : '清空所有路径历史' }}
+          {{ clearing ? t('settings.clearing') : t('settings.clearAllPaths') }}
         </button>
       </div>
 
       <div class="actions">
-        <button @click="emit('close')">取消</button>
-        <button class="primary" @click="handleSave">保存</button>
+        <button @click="emit('close')">{{ t('install.cancel') }}</button>
+        <button class="primary" @click="handleSave">{{ t('settings.save') }}</button>
       </div>
     </div>
   </div>

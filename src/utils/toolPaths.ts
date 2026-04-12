@@ -7,7 +7,7 @@ export const TOOL_LABELS: Record<ToolType, string> = {
   'opencode': 'Opencode',
   'qoder': 'Qoder',
   'kilo': 'Kilo Code',
-  'custom': '自定义',
+  'custom': 'Custom',
 };
 
 // 默认全局路径模板 (使用 %USERPROFILE% 占位符，由 Rust 后端解析)

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick } from 'vue';
 import type { Skill, ToolType } from '../types';
+import { useI18n } from '../i18n';
 
 export interface QuickInstallEntry {
   label: string;
@@ -24,6 +25,8 @@ const emit = defineEmits<{
   toggleDropdown: [];
   toggleFavorite: [skill: Skill];
 }>();
+
+const { t } = useI18n();
 
 const hasEntries = computed(() =>
   props.quickInstallEntries && props.quickInstallEntries.length > 0
@@ -79,7 +82,7 @@ function pathDisplay(targetPath: string) {
 
 <template>
   <div class="skill-card" :class="{ 'dropdown-open': openDropdown }" @click="emit('install', props.skill)">
-    <button class="favorite-btn" :class="{ active: isFavorite }" @click="handleToggleFavorite" :title="isFavorite ? '取消收藏' : '收藏'">
+    <button class="favorite-btn" :class="{ active: isFavorite }" @click="handleToggleFavorite" :title="isFavorite ? t('skill.cancelFavorite') : t('skill.favorite')">
       <svg width="16" height="16" viewBox="0 0 24 24" :fill="isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     </button>
     <div class="skill-name">{{ skill.name }}</div>
@@ -94,7 +97,7 @@ function pathDisplay(targetPath: string) {
     <div class="card-footer">
       <div class="install-btn-group" :class="{ active: openDropdown }">
         <button class="install-btn" @click.stop="emit('install', props.skill)">
-          <span>安装</span>
+          <span>{{ t('skill.install') }}</span>
         </button>
         <button
           v-if="hasEntries"
@@ -121,7 +124,7 @@ function pathDisplay(targetPath: string) {
                 v-if="entry.installType === 'project'"
                 class="item-delete-btn"
                 @click.stop="handleRemoveEntry(entry, $event)"
-                title="删除"
+                :title="t('skill.delete')"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>

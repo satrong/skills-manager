@@ -2,6 +2,7 @@
 import { useSkillDialog } from '../composables/useSkillDialog'
 import { useToast } from '../composables/useToast'
 import { useInstall } from '../composables/useInstall'
+import { useI18n } from '../i18n'
 import type { QuickInstallEntry } from '../components/SkillCard.vue'
 import type { Skill } from '../types'
 import MainContent from '../components/MainContent.vue'
@@ -9,6 +10,7 @@ import MainContent from '../components/MainContent.vue'
 const { selectedSkill } = useSkillDialog()
 const { addToast } = useToast()
 const { installSkill } = useInstall()
+const { t } = useI18n()
 
 async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
   try {
@@ -20,7 +22,7 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
       targetPath: entry.targetPath,
       overwrite: true,
     })
-    addToast('技能安装成功', 'success')
+    addToast(t('app.installSuccess'), 'success')
   } catch (e) {
     addToast(String(e), 'error')
   }

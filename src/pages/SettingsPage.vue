@@ -4,12 +4,14 @@ import { useRouter } from 'vue-router'
 import type { ToolType } from '../types'
 import { TOOL_LABELS } from '../utils/toolPaths'
 import { useSettings } from '../composables/useSettings'
+import { useI18n } from '../i18n'
 import { invoke } from '@tauri-apps/api/core'
-import { ArrowLeft, Wrench, History } from 'lucide-vue-next'
+import { ArrowLeft, Wrench, History, Globe } from 'lucide-vue-next'
 
 const router = useRouter()
 
 const { defaultToolType, setDefaultToolType, clearProjectPaths } = useSettings()
+const { locale, t } = useI18n()
 
 const projectPathCount = ref<number | null>(null)
 const toolPathCount = ref<number | null>(null)
@@ -57,17 +59,32 @@ async function handleClearAll() {
         <button class="back-btn" @click="router.back()">
         <ArrowLeft :size="18" />
       </button>
-      <h2>设置</h2>
+      <h2>{{ t('settings.title') }}</h2>
     </div>
 
     <div class="settings-body">
       <div class="settings-card">
         <div class="card-icon-wrap">
+          <Globe :size="18" class="card-icon" />
+        </div>
+        <div class="card-content">
+          <label>{{ t('settings.language') }}</label>
+          <p class="desc">{{ t('settings.languageDesc') }}</p>
+          <select v-model="locale">
+            <option value="auto">{{ t('settings.langAuto') }}</option>
+            <option value="zh-CN">{{ t('settings.langZhCN') }}</option>
+            <option value="en">{{ t('settings.langEn') }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-icon-wrap">
           <Wrench :size="18" class="card-icon" />
         </div>
         <div class="card-content">
-          <label>默认目标工具</label>
-          <p class="desc">安装技能时默认选中的目标工具。</p>
+          <label>{{ t('settings.defaultTool') }}</label>
+          <p class="desc">{{ t('settings.defaultToolDesc') }}</p>
           <select v-model="defaultToolType">
             <option v-for="tool in tools" :key="tool.value" :value="tool.value">
               {{ tool.label }}
@@ -81,16 +98,16 @@ async function handleClearAll() {
           <History :size="18" class="card-icon" />
         </div>
         <div class="card-content">
-          <label>路径历史</label>
+          <label>{{ t('settings.pathHistory') }}</label>
           <p class="desc">
-            安装技能时的路径记录（项目路径 {{ projectPathCount ?? '...' }} 条，工具路径 {{ toolPathCount ?? '...' }} 条）。
+            {{ t('settings.pathHistoryDesc', { projectCount: projectPathCount ?? '...', toolPathCount: toolPathCount ?? '...' }) }}
           </p>
           <button
             class="danger-btn"
             :disabled="clearing || totalCount === 0"
             @click="handleClearAll"
           >
-            {{ clearing ? '清空中...' : '清空所有路径历史' }}
+            {{ clearing ? t('settings.clearing') : t('settings.clearAllPaths') }}
           </button>
         </div>
       </div>

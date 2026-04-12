@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { open } from '@tauri-apps/plugin-dialog';
+import { useI18n } from '../i18n';
 
 const emit = defineEmits<{
   add: [url: string];
@@ -10,11 +11,12 @@ const emit = defineEmits<{
 
 const url = ref('');
 const error = ref('');
+const { t } = useI18n();
 
 function validate(value: string): string {
-  if (!value.trim()) return '请输入仓库 URL';
+  if (!value.trim()) return t('repoManager.urlRequired');
   if (!value.startsWith('https://github.com/')) {
-    return '请输入有效的 GitHub 仓库 URL (https://github.com/...)';
+    return t('repoManager.urlInvalid');
   }
   return '';
 }
@@ -32,7 +34,7 @@ async function handleSelectDir() {
   const selected = await open({
     directory: true,
     multiple: false,
-    title: '选择本地技能目录',
+    title: t('repoManager.selectDirTitle'),
   });
   if (selected) {
     emit('addLocal', selected);
@@ -43,16 +45,16 @@ async function handleSelectDir() {
 <template>
   <div class="modal-overlay" @click.self="emit('close')" tabindex="0" @keydown.escape="emit('close')">
     <div class="modal">
-      <h2>添加技能来源</h2>
-      <p class="hint">从 GitHub 仓库克隆，或直接选择本地目录</p>
+      <h2>{{ t('repoManager.title') }}</h2>
+      <p class="hint">{{ t('repoManager.hint') }}</p>
 
       <form @submit.prevent="handleSubmit">
         <div class="field">
-          <label>仓库 URL</label>
+          <label>{{ t('repoManager.urlLabel') }}</label>
           <input
             v-model="url"
             type="text"
-            placeholder="https://github.com/username/skills-repo"
+            :placeholder="t('repoManager.urlPlaceholder')"
             :class="{ error: error }"
             @input="error = ''"
             autofocus
@@ -64,9 +66,9 @@ async function handleSelectDir() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>
             </svg>
-            <span>选择本地目录</span>
+            <span>{{ t('repoManager.selectLocalDir') }}</span>
           </button>
-          <button type="submit" class="primary">克隆并添加</button>
+          <button type="submit" class="primary">{{ t('repoManager.cloneAndAdd') }}</button>
         </div>
       </form>
     </div>

@@ -5,6 +5,7 @@ import { useSkillDialog } from './composables/useSkillDialog'
 import { useSettings } from './composables/useSettings'
 import { useFavorites } from './composables/useFavorites'
 import { useRepos } from './composables/useRepos'
+import { useI18n } from './i18n'
 import IconRail from './components/IconRail.vue'
 import SkillDialog from './components/SkillDialog.vue'
 import Toast from './components/Toast.vue'
@@ -14,6 +15,7 @@ const { selectedSkill } = useSkillDialog()
 const { loadSettings } = useSettings()
 const { loadFavorites } = useFavorites()
 const { error: reposError } = useRepos()
+const { t } = useI18n()
 
 watch(reposError, (err) => {
   if (err) addToast(err, 'error')
@@ -38,7 +40,7 @@ onMounted(async () => {
     v-if="selectedSkill"
     :skill="selectedSkill"
     @close="selectedSkill = null"
-    @installed="addToast('技能安装成功', 'success')"
+    @installed="addToast(t('app.installSuccess'), 'success')"
   />
 
   <Toast />

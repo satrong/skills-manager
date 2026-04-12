@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Repo, Skill, ToolType } from '../types';
 import { useSkills } from '../composables/useSkills';
 import { useRepos } from '../composables/useRepos';
+import { useI18n } from '../i18n';
 import SkillCard from './SkillCard.vue';
 import type { QuickInstallEntry } from './SkillCard.vue';
 import { Loader2, Inbox, Search, Copy, Check, StarOff } from 'lucide-vue-next';
@@ -25,6 +26,7 @@ const { repos } = useRepos();
 const { skillsByRepo, loadSkills } = useSkills();
 const { defaultToolType, projectPaths, loadProjectPaths, removeProjectPath } = useSettings();
 const { favorites, isFavorite, toggleFavorite } = useFavorites();
+const { t } = useI18n();
 
 const skills = ref<Skill[]>([]);
 const loading = ref(false);
@@ -38,7 +40,7 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
   if (projectPaths.value.length) {
     const tool = defaultToolType.value;
     entries.push({
-      label: `项目安装 (${TOOL_LABELS[tool] || tool})`,
+      label: `${t('install.projectQuick')} (${TOOL_LABELS[tool] || tool})`,
       installType: 'project',
       toolType: tool,
       targetPath: '',
@@ -56,7 +58,7 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
   if (Object.keys(toolPathsConfig.value).length) {
     for (const [tool, path] of Object.entries(toolPathsConfig.value)) {
       entries.push({
-        label: `全局安装 (${TOOL_LABELS[tool as ToolType] || tool})`,
+        label: `${t('install.globalQuick')} (${TOOL_LABELS[tool as ToolType] || tool})`,
         installType: 'global',
         toolType: tool as ToolType,
         targetPath: path,
@@ -164,13 +166,13 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
     <!-- No repo selected (repos view) -->
     <div v-if="props.viewMode === 'repos' && !repoUrl" class="empty-state">
       <Inbox :size="48" class="empty-icon" />
-      <p>选择一个仓库查看技能</p>
+      <p>{{ t('main.selectRepo') }}</p>
     </div>
 
     <!-- Loading (repos view) -->
     <div v-else-if="props.viewMode === 'repos' && loading" class="loading-state">
       <Loader2 :size="24" class="spin" />
-      <span>加载技能中...</span>
+      <span>{{ t('main.loading') }}</span>
     </div>
 
     <!-- Favorites view -->
@@ -183,22 +185,22 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
             v-model="searchQuery"
             type="text"
             class="search-input"
-            placeholder="搜索收藏技能..."
+            :placeholder="t('main.searchFavoriteSkills')"
           />
-          <span v-else class="search-input placeholder-text">搜索收藏技能...</span>
-          <span class="fav-count">{{ favoriteSkills.length }} 个收藏</span>
+          <span v-else class="search-input placeholder-text">{{ t('main.searchFavoriteSkills') }}</span>
+          <span class="fav-count">{{ t('main.favoriteCount', { n: favoriteSkills.length }) }}</span>
         </div>
       </div>
 
       <div v-if="favoriteSkills.length === 0" class="empty-state">
         <StarOff :size="48" class="empty-icon" />
-        <p>暂无收藏技能</p>
+        <p>{{ t('main.noFavorites') }}</p>
       </div>
 
       <template v-else>
         <div v-if="filteredFavoriteSkills.length === 0" class="empty-state">
           <Inbox :size="48" class="empty-icon" />
-          <p>未找到匹配的收藏技能</p>
+          <p>{{ t('main.noMatchFavorites') }}</p>
         </div>
 
         <div v-else class="skills-grid">
@@ -229,11 +231,11 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
             v-model="searchQuery"
             type="text"
             class="search-input"
-            placeholder="搜索技能..."
+            :placeholder="t('main.searchSkills')"
           />
-          <span v-else class="search-input placeholder-text">搜索技能...</span>
+          <span v-else class="search-input placeholder-text">{{ t('main.searchSkills') }}</span>
           <div class="header-divider"></div>
-          <button class="url-chip" @click="copyRepoUrl" :title="copied ? '已复制' : '点击复制地址'">
+          <button class="url-chip" @click="copyRepoUrl" :title="copied ? t('main.copied') : t('main.copyUrl')">
             <span class="url-text">{{ isLocalRepo ? currentRepo!.localPath : currentRepo!.url }}</span>
             <component :is="copied ? Check : Copy" :size="11" class="copy-icon" :class="{ copied }" />
           </button>
@@ -242,13 +244,13 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 
       <div v-if="skills.length === 0" class="empty-state">
         <Inbox :size="48" class="empty-icon" />
-        <p>未找到技能</p>
+        <p>{{ t('main.noSkills') }}</p>
       </div>
 
       <template v-else>
         <div v-if="filteredSkills.length === 0" class="empty-state">
           <Inbox :size="48" class="empty-icon" />
-          <p>未找到匹配的技能</p>
+          <p>{{ t('main.noMatchSkills') }}</p>
         </div>
 
         <div v-else class="skills-grid">

@@ -4,6 +4,7 @@ import type { Skill, InstallType, ToolType } from '../types';
 import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
 import { useSettings } from '../composables/useSettings';
+import { useI18n } from '../i18n';
 import { listen, type UnlistenFn, TauriEvent } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
 
@@ -18,6 +19,7 @@ const emit = defineEmits<{
 
 const { getToolPath, installSkill } = useInstall();
 const { defaultToolType, projectPaths, addProjectPath, removeProjectPath } = useSettings();
+const { t } = useI18n();
 
 const installType = ref<InstallType>('global');
 const toolType = ref<ToolType>(defaultToolType.value);
@@ -120,10 +122,10 @@ function onPathInputChange() {
 
 const previewPath = computed(() => {
   if (installType.value === 'project') {
-    const base = projectPath.value || '<项目路径>';
+    const base = projectPath.value || t('install.projectPathPlaceholder');
     return [base, projectToolDir.value, props.skill.id].join(pathSep);
   }
-  const base = targetPath.value || '<工具技能路径>';
+  const base = targetPath.value || t('install.toolSkillPathPlaceholder');
   return [base, props.skill.id].join(pathSep);
 });
 
@@ -136,7 +138,7 @@ async function handleInstall() {
     : targetPath.value;
 
   if (installType.value === 'project' && !projectPath.value) {
-    error.value = '请输入项目路径';
+    error.value = t('install.inputProjectPath');
     loading.value = false;
     return;
   }
@@ -163,7 +165,7 @@ async function handleInstall() {
     const msg = String(e);
     if (msg.includes('JUNCTION_EXISTS')) {
       overwriteConfirm.value = false;
-      error.value = '该技能已安装。是否覆盖？';
+      error.value = t('install.alreadyInstalled');
     } else {
       error.value = msg;
     }
@@ -178,7 +180,7 @@ async function handleOverwrite() {
 }
 
 async function selectFolder() {
-  const selected = await open({ directory: true, title: '选择项目目录' });
+  const selected = await open({ directory: true, title: t('install.selectFolder') });
   if (typeof selected === 'string') {
     projectPath.value = selected;
   }
@@ -189,27 +191,27 @@ async function selectFolder() {
   <div class="modal-overlay" @click.self="emit('close')" tabindex="0" @keydown.escape="emit('close')">
     <div class="modal">
       <h2>
-        <span class="install-label">安装技能</span>
+        <span class="install-label">{{ t('install.title') }}</span>
         <span class="skill-name">{{ skill.name }}</span>
       </h2>
       <p class="desc">{{ skill.description }}</p>
 
       <div class="section">
-        <label>安装位置</label>
+        <label>{{ t('install.location') }}</label>
         <div class="radio-group">
           <label class="radio">
             <input type="radio" v-model="installType" value="global" />
-            全局安装（工具配置目录）
+            {{ t('install.global') }}
           </label>
           <label class="radio">
             <input type="radio" v-model="installType" value="project" />
-            项目安装（工具项目目录）
+            {{ t('install.project') }}
           </label>
         </div>
       </div>
 
       <div class="section">
-        <label>目标工具</label>
+        <label>{{ t('install.targetTool') }}</label>
         <select v-model="toolType">
           <option v-for="tool in tools" :key="tool.value" :value="tool.value">
             {{ tool.label }}
@@ -218,12 +220,12 @@ async function selectFolder() {
       </div>
 
       <div v-if="installType === 'global'" class="section install-section">
-        <label>技能目录路径</label>
-        <input v-model="targetPath" type="text" placeholder="工具技能目录路径" :disabled="!isCustomTool" />
+        <label>{{ t('install.skillDirPath') }}</label>
+        <input v-model="targetPath" type="text" :placeholder="t('install.skillDirPlaceholder')" :disabled="!isCustomTool" />
       </div>
 
       <div v-else class="section install-section">
-        <label>项目路径</label>
+        <label>{{ t('install.projectPath') }}</label>
         <div
           class="drop-zone"
           :class="{ 'drop-zone-active': isDragging }"
@@ -235,7 +237,7 @@ async function selectFolder() {
               <input
                 v-model="projectPath"
                 type="text"
-                :placeholder="isWindows ? '例: D:\\MyProject' : '例: /home/user/my-project'"
+                :placeholder="isWindows ? t('install.projectPathPlaceholder.win') : t('install.projectPathPlaceholder.unix')"
                 @focus="onPathInputFocus"
                 @input="onPathInputChange"
                 @blur="showPathDropdown = false"
@@ -251,41 +253,41 @@ async function selectFolder() {
                   <button
                     class="path-delete-btn"
                     @mousedown.prevent.stop="handleRemoveProjectPath(p, $event)"
-                    title="删除"
+                    :title="t('skill.delete')"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                 </div>
               </div>
             </div>
-            <button type="button" class="browse-btn" @click="selectFolder" title="选择文件夹">
+            <button type="button" class="browse-btn" @click="selectFolder" :title="t('install.selectFolder')">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </button>
           </div>
           <div v-if="isDragging" class="drop-overlay">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><polyline points="9 14 12 11 15 14"/></svg>
-            <span>松开以设置项目路径</span>
+            <span>{{ t('install.dropToSet') }}</span>
           </div>
         </div>
-        <span class="hint-text">可直接将项目文件夹拖拽到此窗口</span>
+        <span class="hint-text">{{ t('install.dragHint') }}</span>
       </div>
 
       <div class="preview">
-        <span>将安装到:</span>
+        <span>{{ t('install.preview') }}</span>
         <code>{{ previewPath }}</code>
       </div>
 
       <div v-if="error" class="error-box">
         <span>{{ error }}</span>
-        <button v-if="error.includes('已安装')" @click="handleOverwrite" class="overwrite-btn">
-          覆盖安装
+        <button v-if="error.includes('已安装') || error.includes('installed') || error.includes('Overwrite')" @click="handleOverwrite" class="overwrite-btn">
+          {{ t('install.overwrite') }}
         </button>
       </div>
 
       <div class="actions">
-        <button @click="emit('close')">取消</button>
+        <button @click="emit('close')">{{ t('install.cancel') }}</button>
         <button class="primary" @click="handleInstall" :disabled="loading">
-          {{ loading ? '安装中...' : '安装' }}
+          {{ loading ? t('install.installing') : t('skill.install') }}
         </button>
       </div>
     </div>

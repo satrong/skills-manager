@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRepos } from '../composables/useRepos';
+import { useI18n } from '../i18n';
 import { parseRepoUrl } from '../utils/repo';
 import { RefreshCw, Trash2, Plus, Loader2, Folder } from 'lucide-vue-next';
 
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 }>();
 
 const { repos, updateAllLoading, isUpdateLoading, addRepoUrl } = useRepos();
+const { t } = useI18n();
 
 function formatTime(timestamp: string): string {
   if (!timestamp) return '';
@@ -24,10 +26,10 @@ function formatTime(timestamp: string): string {
   if (isNaN(date.getTime())) return '';
   const now = new Date();
   const diff = (now.getTime() - date.getTime()) / 1000;
-  if (diff < 60) return '刚刚';
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} 天前`;
+  if (diff < 60) return t('repo.justNow');
+  if (diff < 3600) return t('repo.minutesAgo', { n: Math.floor(diff / 60) });
+  if (diff < 86400) return t('repo.hoursAgo', { n: Math.floor(diff / 3600) });
+  if (diff < 2592000) return t('repo.daysAgo', { n: Math.floor(diff / 86400) });
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
@@ -44,12 +46,12 @@ const repoList = computed(() => repos.value.map(r => ({
 <template>
   <div class="repo-panel">
     <div class="panel-header">
-      <span class="panel-title">技能集合</span>
+      <span class="panel-title">{{ t('repo.panelTitle') }}</span>
       <button
         class="icon-btn"
         @click="emit('updateAll')"
         :disabled="updateAllLoading || repoList.length === 0"
-        title="全部更新"
+        :title="t('repo.updateAll')"
       >
         <Loader2 v-if="updateAllLoading" :size="15" class="spin" />
         <RefreshCw v-else :size="15" />
@@ -70,7 +72,7 @@ const repoList = computed(() => repos.value.map(r => ({
             <div class="repo-subtitle">
               <span class="repo-subtitle-text">
                 <Folder v-if="repo.isLocal" :size="12" class="local-folder-icon" />
-                {{ repo.isLocal ? '本地目录' : repo.meta.name }}
+                {{ repo.isLocal ? t('repo.localDir') : repo.meta.name }}
               </span>
               <span v-if="repo.skillCount != null" class="skill-count">{{ repo.skillCount }}</span>
             </div>
@@ -80,7 +82,7 @@ const repoList = computed(() => repos.value.map(r => ({
               <button
                 class="icon-btn-sm danger"
                 @click="emit('remove', repo.url)"
-                title="删除"
+                :title="t('repo.delete')"
               >
                 <Trash2 :size="13" />
               </button>
@@ -89,7 +91,7 @@ const repoList = computed(() => repos.value.map(r => ({
           <div class="repo-meta" v-else>
             <span v-if="addRepoUrl === repo.url" class="repo-updating">
               <Loader2 :size="11" class="spin" />
-              <span>克隆中</span>
+              <span>{{ t('repo.cloning') }}</span>
             </span>
             <span v-else class="repo-time">{{ formatTime(repo.lastUpdate) }}</span>
             <div class="repo-actions" @click.stop>
@@ -101,7 +103,7 @@ const repoList = computed(() => repos.value.map(r => ({
                   class="icon-btn-sm"
                   @click="emit('update', repo.url)"
                   :disabled="isUpdateLoading(repo.url)"
-                  title="更新"
+                  :title="t('repo.update')"
                 >
                   <Loader2 v-if="isUpdateLoading(repo.url)" :size="13" class="spin" />
                   <RefreshCw v-else :size="13" />
@@ -109,7 +111,7 @@ const repoList = computed(() => repos.value.map(r => ({
                 <button
                   class="icon-btn-sm danger"
                   @click="emit('remove', repo.url)"
-                  title="删除"
+                  :title="t('repo.delete')"
                 >
                   <Trash2 :size="13" />
                 </button>
@@ -126,15 +128,15 @@ const repoList = computed(() => repos.value.map(r => ({
             <path d="M9 18c-4.51 2-5-2-7-2"/>
           </svg>
         </div>
-        <span>暂无仓库</span>
-        <span class="empty-hint">点击下方按钮添加</span>
+        <span>{{ t('repo.empty') }}</span>
+        <span class="empty-hint">{{ t('repo.emptyHint') }}</span>
       </div>
     </div>
 
     <div class="panel-footer">
       <button class="add-btn" @click="emit('add')">
         <Plus :size="15" />
-        <span>添加来源</span>
+        <span>{{ t('repo.addSource') }}</span>
       </button>
     </div>
   </div>

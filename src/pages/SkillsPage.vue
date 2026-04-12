@@ -7,6 +7,7 @@ import { useSkills } from '../composables/useSkills'
 import { useToast } from '../composables/useToast'
 import { useInstall } from '../composables/useInstall'
 import { useSkillDialog } from '../composables/useSkillDialog'
+import { useI18n } from '../i18n'
 import type { QuickInstallEntry } from '../components/SkillCard.vue'
 import RepoPanel from '../components/RepoPanel.vue'
 import MainContent from '../components/MainContent.vue'
@@ -28,6 +29,7 @@ const { clearCache } = useSkills()
 const { addToast } = useToast()
 const { installSkill } = useInstall()
 const { selectedSkill } = useSkillDialog()
+const { t } = useI18n()
 
 const selectedRepoUrl = ref<string | null>(null)
 const showAddRepo = ref(false)
@@ -41,7 +43,7 @@ onMounted(async () => {
   if (repos.value.length === 0) {
     await ensureBuiltinRepos()
     if (repos.value.length > 0) {
-      addToast('已自动添加内置仓库', 'success')
+      addToast(t('skills.autoAddedBuiltin'), 'success')
     }
   }
   if (repos.value.length > 0) {
@@ -52,14 +54,14 @@ onMounted(async () => {
 function handleAddRepo(url: string) {
   showAddRepo.value = false
   addRepo(url)
-    .then(() => addToast('仓库添加成功', 'success'))
+    .then(() => addToast(t('skills.repoAdded'), 'success'))
     .catch(() => {})
 }
 
 function handleAddLocalDir(path: string) {
   showAddRepo.value = false
   addLocalDir(path)
-    .then(() => addToast('本地目录添加成功', 'success'))
+    .then(() => addToast(t('skills.localDirAdded'), 'success'))
     .catch(() => {})
 }
 
@@ -67,7 +69,7 @@ async function handleUpdateAll() {
   try {
     const results = await updateAllRepos()
     await loadRepos()
-    addToast(results.join('\n') || '所有仓库已更新', 'success')
+    addToast(results.join('\n') || t('skills.allReposUpdated'), 'success')
   } catch (e) {
     // error already handled by watch
   }
@@ -77,7 +79,7 @@ async function handleUpdateRepo(url: string) {
   try {
     const result = await updateRepo(url)
     await loadRepos()
-    addToast(result || '更新完成', 'success')
+    addToast(result || t('skills.updateComplete'), 'success')
   } catch (e) {
     // error already handled by watch
   }
@@ -87,19 +89,19 @@ async function handleRemoveRepo(url: string) {
   const repo = repos.value.find(r => r.url === url)
   const isLocal = repo?.source === 'local'
   const message = isLocal
-    ? '确定移除该本地目录？文件不会被删除。'
-    : '确定删除该仓库？本地克隆的文件也会被删除。'
+    ? t('skills.confirmRemoveLocal')
+    : t('skills.confirmRemoveGit')
   const confirmed = await ask(message, {
-    title: isLocal ? '移除本地目录' : '删除仓库',
+    title: isLocal ? t('skills.removeLocalTitle') : t('skills.removeGitTitle'),
     kind: 'warning',
-    okLabel: isLocal ? '移除' : '删除',
-    cancelLabel: '取消',
+    okLabel: isLocal ? t('skills.remove') : t('repo.delete'),
+    cancelLabel: t('install.cancel'),
   })
   if (!confirmed) return
   try {
     await removeRepo(url)
     clearCache(url)
-    addToast('仓库已删除', 'success')
+    addToast(t('skills.repoRemoved'), 'success')
   } catch (e) {
     // error already handled by watch
   } finally {
@@ -117,7 +119,7 @@ async function handleQuickInstall(skill: Skill, entry: QuickInstallEntry) {
       targetPath: entry.targetPath,
       overwrite: true,
     })
-    addToast('技能安装成功', 'success')
+    addToast(t('app.installSuccess'), 'success')
   } catch (e) {
     addToast(String(e), 'error')
   }
