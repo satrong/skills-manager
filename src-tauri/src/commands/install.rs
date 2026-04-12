@@ -28,9 +28,13 @@ pub async fn install_skill(
         .ok_or_else(|| format!("技能不存在: {}", skill_id))?;
 
     let install_dir = if install_type == "project" {
-        let project_dir = paths::project_tool_dir(&tool_type)
-            .unwrap_or_else(|| ".skills".to_string());
-        PathBuf::from(&target_path).join(project_dir)
+        if tool_type == "custom" {
+            PathBuf::from(paths::expand_path(&target_path)?)
+        } else {
+            let project_dir = paths::project_tool_dir(&tool_type)
+                .unwrap_or_else(|| ".skills".to_string());
+            PathBuf::from(&target_path).join(project_dir)
+        }
     } else {
         if target_path.is_empty() {
             let expanded = paths::default_tool_path(&tool_type)

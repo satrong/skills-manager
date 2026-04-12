@@ -59,6 +59,8 @@ const zhCN = {
   'install.projectPathPlaceholder': '<项目路径>',
   'install.toolSkillPathPlaceholder': '<工具技能路径>',
   'install.inputProjectPath': '请输入项目路径',
+  'install.inputSkillDirPath': '请输入技能目录路径',
+  'install.customProjectSkillDirDesc': '自定义工具无预设目录，请手动输入技能目录路径',
   'install.alreadyInstalled': '该技能已安装。是否覆盖？',
   'install.overwrite': '覆盖安装',
   'install.installing': '安装中...',

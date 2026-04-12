@@ -61,6 +61,8 @@ const en: Record<TranslationKeys, string> = {
   'install.projectPathPlaceholder': '<project path>',
   'install.toolSkillPathPlaceholder': '<tool skill path>',
   'install.inputProjectPath': 'Please enter project path',
+  'install.inputSkillDirPath': 'Please enter skill directory path',
+  'install.customProjectSkillDirDesc': 'Custom tool has no preset directory, please enter skill directory path manually',
   'install.alreadyInstalled': 'Skill already installed. Overwrite?',
   'install.overwrite': 'Overwrite',
   'install.installing': 'Installing...',

@@ -25,6 +25,7 @@ const installType = ref<InstallType>('global');
 const toolType = ref<ToolType>(defaultToolType.value);
 const targetPath = ref('');
 const projectPath = ref('');
+const customSkillDir = ref('');
 const loading = ref(false);
 const error = ref('');
 const overwriteConfirm = ref(false);
@@ -78,10 +79,11 @@ watch(installType, async (type) => {
     targetPath.value = await getToolPath(toolType.value);
   } else {
     targetPath.value = '';
+    customSkillDir.value = '';
   }
 });
 
-watch([toolType, targetPath, projectPath], () => {
+watch([toolType, targetPath, projectPath, customSkillDir], () => {
   error.value = '';
   overwriteConfirm.value = false;
 });
@@ -90,6 +92,7 @@ const isWindows = navigator.userAgent.includes('Windows');
 const pathSep = isWindows ? '\\' : '/';
 
 const isCustomTool = computed(() => toolType.value === 'custom');
+const isProjectCustom = computed(() => installType.value === 'project' && isCustomTool.value);
 
 const filteredPaths = computed(() => {
   const input = projectPath.value.toLowerCase();
@@ -121,6 +124,10 @@ function onPathInputChange() {
 
 const previewPath = computed(() => {
   if (installType.value === 'project') {
+    if (isProjectCustom.value) {
+      const base = customSkillDir.value || t('install.toolSkillPathPlaceholder');
+      return [base, props.skill.id].join(pathSep);
+    }
     const base = projectPath.value || t('install.projectPathPlaceholder');
     return [base, projectToolDir.value, props.skill.id].join(pathSep);
   }
@@ -132,14 +139,26 @@ async function handleInstall() {
   error.value = '';
   loading.value = true;
 
-  const resolvedTargetPath = installType.value === 'project'
-    ? projectPath.value
-    : targetPath.value;
+  let resolvedTargetPath: string;
 
-  if (installType.value === 'project' && !projectPath.value) {
-    error.value = t('install.inputProjectPath');
-    loading.value = false;
-    return;
+  if (installType.value === 'project') {
+    if (isProjectCustom.value) {
+      if (!customSkillDir.value) {
+        error.value = t('install.inputSkillDirPath');
+        loading.value = false;
+        return;
+      }
+      resolvedTargetPath = customSkillDir.value;
+    } else {
+      if (!projectPath.value) {
+        error.value = t('install.inputProjectPath');
+        loading.value = false;
+        return;
+      }
+      resolvedTargetPath = projectPath.value;
+    }
+  } else {
+    resolvedTargetPath = targetPath.value;
   }
 
   try {
@@ -152,7 +171,7 @@ async function handleInstall() {
       overwrite: overwriteConfirm.value,
     });
 
-    if (installType.value === 'project' && projectPath.value) {
+    if (installType.value === 'project' && !isProjectCustom.value && projectPath.value) {
       try {
         await addProjectPath(projectPath.value);
       } catch { /* ignore */ }
@@ -221,6 +240,12 @@ async function selectFolder() {
       <div v-if="installType === 'global'" class="section install-section">
         <label>{{ t('install.skillDirPath') }}</label>
         <input v-model="targetPath" type="text" :placeholder="t('install.skillDirPlaceholder')" :disabled="!isCustomTool" />
+      </div>
+
+      <div v-else-if="isProjectCustom" class="section install-section">
+        <label>{{ t('install.skillDirPath') }}</label>
+        <input v-model="customSkillDir" type="text" :placeholder="t('install.skillDirPlaceholder')" />
+        <span class="hint-text">{{ t('install.customProjectSkillDirDesc') }}</span>
       </div>
 
       <div v-else class="section install-section">
