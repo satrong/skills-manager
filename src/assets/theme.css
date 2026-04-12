@@ -49,7 +49,7 @@
   --text-muted: #64748b;
   --primary: #B74304;
   --primary-hover: #FF7A27;
-  --primary-light: #451a03;
+  --primary-light: rgba(255, 122, 39, 0.15);
   --danger: #ef4444;
   --danger-hover: #dc2626;
   --danger-light: #450a0a;
