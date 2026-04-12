@@ -1,9 +1,15 @@
 use crate::models::{Skill, SkillIndex};
 use crate::commands::config::load_config_from_disk;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
+
+/// 根据技能名称去重，保留首次出现的技能
+fn dedup_skills_by_name(skills: Vec<Skill>) -> Vec<Skill> {
+    let mut seen = HashSet::new();
+    skills.into_iter().filter(|s| seen.insert(s.name.clone())).collect()
+}
 
 /// 从仓库目录解析技能列表
 /// 优先读取 skills.json 索引文件，否则通过 SKILL.md frontmatter 识别
@@ -13,7 +19,7 @@ fn parse_skills_from_repo(repo_dir: &Path, repo_url: &str) -> Vec<Skill> {
     if index_file.exists() {
         if let Ok(content) = fs::read_to_string(&index_file) {
             if let Ok(index) = serde_json::from_str::<SkillIndex>(&content) {
-                return index.skills.into_iter().map(|entry| Skill {
+                let skills: Vec<Skill> = index.skills.into_iter().map(|entry| Skill {
                     id: entry.id,
                     name: entry.name,
                     description: entry.description,
@@ -23,12 +29,14 @@ fn parse_skills_from_repo(repo_dir: &Path, repo_url: &str) -> Vec<Skill> {
                     author: entry.author,
                     tags: entry.tags,
                 }).collect();
+                return dedup_skills_by_name(skills);
             }
         }
     }
 
     // 回退：扫描仓库中所有 SKILL.md 文件，通过 frontmatter 识别技能
-    scan_skills_from_skill_md(repo_dir, repo_url)
+    let skills = scan_skills_from_skill_md(repo_dir, repo_url);
+    dedup_skills_by_name(skills)
 }
 
 /// 解析内容前 10 行的 frontmatter
