@@ -5,7 +5,7 @@ import type { ToolType } from '../types'
 import { TOOL_LABELS } from '../utils/toolPaths'
 import { useSettings } from '../composables/useSettings'
 import { invoke } from '@tauri-apps/api/core'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, Wrench, History } from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -54,35 +54,45 @@ async function handleClearAll() {
 <template>
   <div class="settings-page">
     <div class="settings-header">
-      <button class="back-btn" @click="router.push({ name: 'skills' })">
+        <button class="back-btn" @click="router.back()">
         <ArrowLeft :size="18" />
       </button>
       <h2>设置</h2>
     </div>
 
     <div class="settings-body">
-      <div class="section">
-        <label>默认目标工具</label>
-        <p class="desc">安装技能时默认选中的目标工具。</p>
-        <select v-model="defaultToolType">
-          <option v-for="tool in tools" :key="tool.value" :value="tool.value">
-            {{ tool.label }}
-          </option>
-        </select>
+      <div class="settings-card">
+        <div class="card-icon-wrap">
+          <Wrench :size="18" class="card-icon" />
+        </div>
+        <div class="card-content">
+          <label>默认目标工具</label>
+          <p class="desc">安装技能时默认选中的目标工具。</p>
+          <select v-model="defaultToolType">
+            <option v-for="tool in tools" :key="tool.value" :value="tool.value">
+              {{ tool.label }}
+            </option>
+          </select>
+        </div>
       </div>
 
-      <div class="section">
-        <label>路径历史</label>
-        <p class="desc">
-          安装技能时的路径记录（项目路径 {{ projectPathCount ?? '...' }} 条，工具路径 {{ toolPathCount ?? '...' }} 条）。
-        </p>
-        <button
-          class="danger-btn"
-          :disabled="clearing || totalCount === 0"
-          @click="handleClearAll"
-        >
-          {{ clearing ? '清空中...' : '清空所有路径历史' }}
-        </button>
+      <div class="settings-card">
+        <div class="card-icon-wrap danger">
+          <History :size="18" class="card-icon" />
+        </div>
+        <div class="card-content">
+          <label>路径历史</label>
+          <p class="desc">
+            安装技能时的路径记录（项目路径 {{ projectPathCount ?? '...' }} 条，工具路径 {{ toolPathCount ?? '...' }} 条）。
+          </p>
+          <button
+            class="danger-btn"
+            :disabled="clearing || totalCount === 0"
+            @click="handleClearAll"
+          >
+            {{ clearing ? '清空中...' : '清空所有路径历史' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -139,16 +149,67 @@ async function handleClearAll() {
   color: var(--text-primary);
 }
 .settings-body {
-  padding: 24px 20px;
-  max-width: 480px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
-.desc { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
-.section { display: flex; flex-direction: column; gap: 6px; }
-label { font-size: 0.85rem; font-weight: 500; color: var(--text-primary); }
+.settings-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.settings-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--card-hover-shadow);
+  background: var(--card-hover-bg);
+}
+.card-icon-wrap {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-icon-wrap.danger {
+  background: var(--danger-light);
+}
+.card-icon {
+  color: var(--primary);
+}
+.card-icon-wrap.danger .card-icon {
+  color: var(--danger);
+}
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.desc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.45;
+}
 select {
+  margin-top: 2px;
   padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -167,24 +228,16 @@ select:focus {
   border-color: var(--primary);
   outline: none;
 }
-button {
-  padding: 8px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--bg-surface-hover);
-  color: var(--text-primary);
-  font-size: 0.85rem;
-  transition: background 0.15s;
-}
-button:hover { background: var(--bg-surface); }
 .danger-btn {
   align-self: flex-start;
   padding: 6px 16px;
   font-size: 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
   background: var(--danger-light);
   color: var(--danger);
   border-color: transparent;
+  transition: background 0.15s, color 0.15s;
 }
 .danger-btn:hover:not(:disabled) { background: var(--danger); color: #fff; }
 .danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
