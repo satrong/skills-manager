@@ -120,6 +120,14 @@ const filteredFavoriteSkills = computed(() => {
   );
 });
 
+const repoNameMap = computed(() => {
+  const map = new Map<string, string>();
+  for (const repo of repos.value) {
+    map.set(repo.url, repo.name);
+  }
+  return map;
+});
+
 async function handleToggleFavorite(skill: Skill) {
   try {
     await toggleFavorite(skill.id, skill.repoUrl);
@@ -209,6 +217,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick));
             :key="skill.id"
             :skill="skill"
             :is-favorite="true"
+            :repo-name="repoNameMap.get(skill.repoUrl)"
             :quick-install-entries="quickInstallEntries"
             :open-dropdown="openDropdownId === skill.id"
             @install="emit('installSkill', $event)"

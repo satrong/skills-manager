@@ -16,6 +16,7 @@ const props = defineProps<{
   quickInstallEntries?: QuickInstallEntry[];
   openDropdown?: boolean;
   isFavorite?: boolean;
+  repoName?: string;
 }>();
 
 const emit = defineEmits<{
@@ -95,6 +96,10 @@ function pathDisplay(targetPath: string) {
       <span v-for="tag in skill.tags" :key="tag" class="tag">{{ tag }}</span>
     </div>
     <div class="card-footer">
+      <div v-if="repoName" class="skill-source">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M2 10h20"/></svg>
+        <span>{{ repoName }}</span>
+      </div>
       <div class="install-btn-group" :class="{ active: openDropdown }">
         <button class="install-btn" @click.stop="emit('install', props.skill)">
           <span>{{ t('skill.install') }}</span>
@@ -174,6 +179,29 @@ function pathDisplay(targetPath: string) {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.skill-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1.5;
+  transition: color 0.15s;
+}
+.skill-source span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skill-source svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.skill-card:hover .skill-source {
+  color: var(--text-secondary);
+}
 .skill-meta {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -194,8 +222,12 @@ function pathDisplay(targetPath: string) {
 }
 .card-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   margin-top: auto;
+  gap: 8px;
+}
+.card-footer > :last-child {
+  margin-left: auto;
 }
 .install-btn-group {
   position: relative;
