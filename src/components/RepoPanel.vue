@@ -145,7 +145,7 @@ const repoList = computed(() => repos.value.map(r => ({
   width: 260px;
   min-width: 260px;
   height: 100%;
-  background: var(--panel-bg);
+  background: var(--card-bg);
   box-shadow: var(--panel-shadow);
   display: flex;
   flex-direction: column;

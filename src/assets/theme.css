@@ -23,7 +23,7 @@
   --success: #16a34a;
   --success-light: #f0fdf4;
   --rail-bg: #ecebeb;
-  --panel-bg: linear-gradient(180deg, #eeedea 0%, #eae8e5 100%);
+  --panel-bg: #ecebe8;
   --content-bg: #F2F1EF;
   --card-bg: rgba(255, 255, 255, 0.75);
   --card-hover-bg: rgba(255, 255, 255, 0.92);
@@ -56,7 +56,7 @@
   --success: #22c55e;
   --success-light: #052e16;
   --rail-bg: linear-gradient(180deg, #27282f 0%, #22232a 100%);
-  --panel-bg: linear-gradient(180deg, #22232a 0%, #1c1d23 100%);
+  --panel-bg: #1f2026;
   --content-bg: #171717;
   --card-bg: rgba(31, 32, 37, 0.65);
   --card-hover-bg: rgba(41, 42, 48, 0.8);
