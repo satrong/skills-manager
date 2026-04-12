@@ -46,7 +46,7 @@ pub fn default_tool_path(tool: &str) -> Option<String> {
         "codex" => home.join(".codex").join("skills"),
         "opencode" => home.join(".config").join("opencode").join("skills"),
         "qoder" => home.join(".qoder").join("skills"),
-        "kilo" => home.join(".kilocode").join("skills"),
+        "kilo" => home.join(".kilo").join("skills"),
         _ => return None,
     };
     Some(path.to_string_lossy().to_string())
@@ -60,7 +60,7 @@ pub fn project_tool_dir(tool: &str) -> Option<String> {
         "codex" => PathBuf::from(".codex").join("skills"),
         "opencode" => PathBuf::from(".opencode").join("skills"),
         "qoder" => PathBuf::from(".qoder").join("skills"),
-        "kilo" => PathBuf::from(".kilocode").join("rules"),
+        "kilo" => PathBuf::from(".kilo").join("skills"),
         _ => return None,
     };
     Some(path.to_string_lossy().to_string())

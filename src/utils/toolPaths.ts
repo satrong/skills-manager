@@ -6,7 +6,7 @@ export const TOOL_LABELS: Record<ToolType, string> = {
   'codex': 'Codex',
   'opencode': 'Opencode',
   'qoder': 'Qoder',
-  'kilo': 'Kilo Code',
+  'kilo': 'Kilo',
   'custom': 'Custom',
 };
 
@@ -17,7 +17,7 @@ export const DEFAULT_TOOL_PATHS: Record<Exclude<ToolType, 'custom'>, string> = {
   'codex': '%USERPROFILE%\\.codex\\skills',
   'opencode': '%USERPROFILE%\\.config\\opencode\\skills',
   'qoder': '%USERPROFILE%\\.qoder\\skills',
-  'kilo': '%USERPROFILE%\\.kilocode\\skills',
+  'kilo': '%USERPROFILE%\\.kilo\\skills',
 };
 
 // 各工具在项目中的配置目录（相对于项目根目录）
@@ -27,5 +27,5 @@ export const PROJECT_TOOL_DIRS: Record<Exclude<ToolType, 'custom'>, string> = {
   'codex': '.codex\\skills',
   'opencode': '.opencode\\skills',
   'qoder': '.qoder\\skills',
-  'kilo': '.kilocode\\rules',
+  'kilo': '.kilo\\skills',
 };
