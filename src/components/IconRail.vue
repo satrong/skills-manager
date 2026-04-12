@@ -72,7 +72,7 @@ const themeTitle = {
   min-width: 56px;
   height: 100%;
   background: var(--rail-bg);
-  border-right: 1px solid var(--border);
+
   box-shadow: var(--panel-shadow);
   display: flex;
   flex-direction: column;
