@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Skill, InstallType, ToolType } from '../types';
-import { TOOL_LABELS, getProjectDir } from '../utils/toolPaths';
+import { TOOL_LABELS, getProjectDir, getToolLabel } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
 import { useSettings } from '../composables/useSettings';
 import { useI18n } from '../i18n';
@@ -57,9 +57,9 @@ onUnmounted(() => {
   unlistenFns.forEach(fn => fn());
 });
 
-const tools: { value: ToolType; label: string }[] = (
-  Object.entries(TOOL_LABELS) as [ToolType, string][]
-).map(([value, label]) => ({ value, label }));
+const tools = computed<{ value: ToolType; label: string }[]>(() =>
+  (Object.entries(TOOL_LABELS) as [ToolType, string][]).map(([value]) => ({ value, label: getToolLabel(value, t('tool.custom')) }))
+);
 
 const projectToolDir = computed(() => {
   return (getProjectDir(toolType.value) ?? '.skills').replace(/\//g, pathSep);

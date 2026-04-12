@@ -10,7 +10,7 @@ import { Loader2, Inbox, Search, Copy, Check, StarOff } from 'lucide-vue-next';
 import { invoke } from '@tauri-apps/api/core';
 import { useSettings } from '../composables/useSettings';
 import { useFavorites } from '../composables/useFavorites';
-import { TOOL_LABELS } from '../utils/toolPaths';
+import { getToolLabel } from '../utils/toolPaths';
 
 const props = defineProps<{
   repoUrl: string | null;
@@ -40,7 +40,7 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
   if (projectPaths.value.length) {
     const tool = defaultToolType.value;
     entries.push({
-      label: `${t('install.projectQuick')} (${TOOL_LABELS[tool] || tool})`,
+      label: `${t('install.projectQuick')} (${getToolLabel(tool, t('tool.custom'))})`,
       installType: 'project',
       toolType: tool,
       targetPath: '',
@@ -58,7 +58,7 @@ const quickInstallEntries = computed<QuickInstallEntry[]>(() => {
   if (Object.keys(toolPathsConfig.value).length) {
     for (const [tool, path] of Object.entries(toolPathsConfig.value)) {
       entries.push({
-        label: `${t('install.globalQuick')} (${TOOL_LABELS[tool as ToolType] || tool})`,
+        label: `${t('install.globalQuick')} (${getToolLabel(tool as ToolType, t('tool.custom'))})`,
         installType: 'global',
         toolType: tool as ToolType,
         targetPath: path,

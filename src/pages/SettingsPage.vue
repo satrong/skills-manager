@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { ToolType } from '../types'
-import { TOOL_LABELS } from '../utils/toolPaths'
+import { TOOL_LABELS, getToolLabel } from '../utils/toolPaths'
 import { useSettings } from '../composables/useSettings'
 import { useI18n } from '../i18n'
 import { invoke } from '@tauri-apps/api/core'
@@ -17,9 +17,9 @@ const projectPathCount = ref<number | null>(null)
 const toolPathCount = ref<number | null>(null)
 const clearing = ref(false)
 
-const tools: { value: ToolType; label: string }[] = (
-  Object.entries(TOOL_LABELS) as [ToolType, string][]
-).map(([value, label]) => ({ value, label }))
+const tools = computed<{ value: ToolType; label: string }[]>(() =>
+  (Object.entries(TOOL_LABELS) as [ToolType, string][]).map(([value]) => ({ value, label: getToolLabel(value, t('tool.custom')) }))
+)
 
 watch(defaultToolType, (val) => {
   setDefaultToolType(val)
