@@ -1,28 +1,21 @@
 <script setup lang="ts">
-import { useTheme } from '../composables/useTheme';
-import { Sun, Moon, Settings, Star } from 'lucide-vue-next';
+import { useRoute, useRouter } from 'vue-router'
+import { useTheme } from '../composables/useTheme'
+import { Sun, Moon, Settings, Star } from 'lucide-vue-next'
 
-const { resolvedTheme, cycleTheme } = useTheme();
-
-const props = defineProps<{
-  activeView: 'repos' | 'favorites';
-}>();
-
-const emit = defineEmits<{
-  settings: [];
-  favorites: [];
-  repos: [];
-}>();
+const route = useRoute()
+const router = useRouter()
+const { resolvedTheme, cycleTheme } = useTheme()
 
 const themeIcon = {
   light: Sun,
   dark: Moon,
-};
+}
 
 const themeTitle = {
   light: '亮色模式',
   dark: '暗色模式',
-};
+}
 </script>
 
 <template>
@@ -38,17 +31,17 @@ const themeTitle = {
       <div class="nav-divider"></div>
       <button
         class="nav-btn"
-        :class="{ active: props.activeView === 'repos' }"
+        :class="{ active: route.name === 'skills' }"
         title="技能列表"
-        @click="emit('repos')"
+        @click="router.push({ name: 'skills' })"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       </button>
       <button
         class="nav-btn"
-        :class="{ active: props.activeView === 'favorites' }"
+        :class="{ active: route.name === 'favorites' }"
         title="收藏列表"
-        @click="emit('favorites')"
+        @click="router.push({ name: 'favorites' })"
       >
         <Star :size="18" />
       </button>
@@ -61,7 +54,12 @@ const themeTitle = {
       >
         <component :is="themeIcon[resolvedTheme]" :size="18" />
       </button>
-      <button class="theme-btn" title="设置" @click="emit('settings')">
+      <button
+        class="theme-btn"
+        :class="{ active: route.name === 'settings' }"
+        title="设置"
+        @click="router.push({ name: 'settings' })"
+      >
         <Settings :size="18" />
       </button>
     </div>
@@ -154,5 +152,9 @@ const themeTitle = {
   background: var(--bg-surface-hover);
   color: var(--text-primary);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+.theme-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
 }
 </style>
