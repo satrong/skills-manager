@@ -1,4 +1,29 @@
+use serde::Deserialize;
 use std::path::PathBuf;
+use std::sync::OnceLock;
+
+#[derive(Deserialize)]
+struct ToolsConfig {
+    tools: std::collections::HashMap<String, ToolDef>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ToolDef {
+    #[allow(dead_code)]
+    label: String,
+    global_path: Option<String>,
+    project_dir: Option<String>,
+}
+
+static TOOLS: OnceLock<ToolsConfig> = OnceLock::new();
+
+fn tools_config() -> &'static ToolsConfig {
+    TOOLS.get_or_init(|| {
+        serde_json::from_str(include_str!("../../../shared/tools.json"))
+            .expect("解析 tools.json 失败")
+    })
+}
 
 /// 获取 skills-manager 配置目录: %USERPROFILE%\.skills-manager\
 pub fn config_dir() -> Result<PathBuf, String> {
@@ -37,33 +62,19 @@ pub fn expand_path(path: &str) -> Result<String, String> {
     Ok(PathBuf::from(&expanded).to_string_lossy().to_string())
 }
 
-/// 获取工具默认技能目录
+/// 获取工具默认技能目录（从 shared/tools.json 读取配置）
 pub fn default_tool_path(tool: &str) -> Option<String> {
+    let def = tools_config().tools.get(tool)?;
+    let global_path = def.global_path.as_ref()?;
     let home = dirs::home_dir()?;
-    let path = match tool {
-        "claude-code" => home.join(".claude").join("skills"),
-        "cursor" => home.join(".cursor").join("skills"),
-        "codex" => home.join(".codex").join("skills"),
-        "opencode" => home.join(".config").join("opencode").join("skills"),
-        "qoder" => home.join(".qoder").join("skills"),
-        "kilo" => home.join(".kilo").join("skills"),
-        _ => return None,
-    };
-    Some(path.to_string_lossy().to_string())
+    Some(home.join(global_path).to_string_lossy().to_string())
 }
 
-/// 获取工具在项目中的配置目录（相对于项目根目录）
+/// 获取工具在项目中的配置目录（相对于项目根目录，从 shared/tools.json 读取配置）
 pub fn project_tool_dir(tool: &str) -> Option<String> {
-    let path = match tool {
-        "claude-code" => PathBuf::from(".claude").join("skills"),
-        "cursor" => PathBuf::from(".cursor").join("rules"),
-        "codex" => PathBuf::from(".codex").join("skills"),
-        "opencode" => PathBuf::from(".opencode").join("skills"),
-        "qoder" => PathBuf::from(".qoder").join("skills"),
-        "kilo" => PathBuf::from(".kilo").join("skills"),
-        _ => return None,
-    };
-    Some(path.to_string_lossy().to_string())
+    let def = tools_config().tools.get(tool)?;
+    let project_dir = def.project_dir.as_ref()?;
+    Some(PathBuf::from(project_dir).to_string_lossy().to_string())
 }
 
 #[cfg(test)]

@@ -1,0 +1,37 @@
+{
+  "tools": {
+    "claude-code": {
+      "label": "Claude Code",
+      "globalPath": ".claude/skills",
+      "projectDir": ".claude/skills"
+    },
+    "cursor": {
+      "label": "Cursor",
+      "globalPath": ".cursor/skills",
+      "projectDir": ".cursor/rules"
+    },
+    "codex": {
+      "label": "Codex",
+      "globalPath": ".codex/skills",
+      "projectDir": ".codex/skills"
+    },
+    "opencode": {
+      "label": "Opencode",
+      "globalPath": ".config/opencode/skills",
+      "projectDir": ".opencode/skills"
+    },
+    "qoder": {
+      "label": "Qoder",
+      "globalPath": ".qoder/skills",
+      "projectDir": ".qoder/skills"
+    },
+    "kilo": {
+      "label": "Kilo",
+      "globalPath": ".kilo/skills",
+      "projectDir": ".kilo/skills"
+    },
+    "custom": {
+      "label": "Custom"
+    }
+  }
+}

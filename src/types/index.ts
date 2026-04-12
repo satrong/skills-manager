@@ -1,11 +1,5 @@
-export type ToolType =
-  | 'claude-code'
-  | 'cursor'
-  | 'codex'
-  | 'opencode'
-  | 'qoder'
-  | 'kilo'
-  | 'custom';
+import type { ToolType } from '../utils/toolPaths'
+export type { ToolType }
 
 export type InstallType = 'global' | 'project';
 

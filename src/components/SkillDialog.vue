@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import type { Skill, InstallType, ToolType } from '../types';
-import { TOOL_LABELS, PROJECT_TOOL_DIRS } from '../utils/toolPaths';
+import { TOOL_LABELS, getProjectDir } from '../utils/toolPaths';
 import { useInstall } from '../composables/useInstall';
 import { useSettings } from '../composables/useSettings';
 import { useI18n } from '../i18n';
@@ -62,8 +62,7 @@ const tools: { value: ToolType; label: string }[] = (
 ).map(([value, label]) => ({ value, label }));
 
 const projectToolDir = computed(() => {
-  if (toolType.value === 'custom') return '.skills';
-  return (PROJECT_TOOL_DIRS[toolType.value] ?? '.skills').replace(/\\/g, pathSep);
+  return (getProjectDir(toolType.value) ?? '.skills').replace(/\//g, pathSep);
 });
 
 watch(toolType, async (tool) => {
