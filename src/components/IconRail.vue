@@ -94,7 +94,7 @@ const themeTitle = {
   color: #FF7A27;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 1px 2px rgba(255, 122, 39, 0.25));
+
   overflow: hidden;
 }
 .logo svg {
