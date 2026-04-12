@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "skills-manager",
+  "productName": "Skills Manager",
   "version": "0.1.0",
   "identifier": "com.satrong.skills-manager",
   "build": {
