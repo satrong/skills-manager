@@ -5,15 +5,25 @@
       "globalPath": ".claude/skills",
       "projectDir": ".claude/skills"
     },
-    "cursor": {
-      "label": "Cursor",
-      "globalPath": ".cursor/skills",
-      "projectDir": ".cursor/rules"
+    "codebuddy": {
+      "label": "CodeBuddy",
+      "globalPath": ".codebuddy/skills",
+      "projectDir": ".codebuddy/skills"
     },
     "codex": {
       "label": "Codex",
       "globalPath": ".codex/skills",
       "projectDir": ".codex/skills"
+    },
+    "cursor": {
+      "label": "Cursor",
+      "globalPath": ".cursor/skills",
+      "projectDir": ".cursor/rules"
+    },
+    "kilo": {
+      "label": "Kilo",
+      "globalPath": ".kilo/skills",
+      "projectDir": ".kilo/skills"
     },
     "opencode": {
       "label": "Opencode",
@@ -25,10 +35,10 @@
       "globalPath": ".qoder/skills",
       "projectDir": ".qoder/skills"
     },
-    "kilo": {
-      "label": "Kilo",
-      "globalPath": ".kilo/skills",
-      "projectDir": ".kilo/skills"
+    "trae": {
+      "label": "Trae",
+      "globalPath": ".trae/skills",
+      "projectDir": ".trae/skills"
     },
     "custom": {
       "label": "Custom"
