@@ -89,6 +89,7 @@ const zhCN = {
   'settings.langZhCN': '简体中文',
   'settings.langEn': 'English',
   'settings.save': '保存',
+  'settings.version': '版本',
 
   'skills.autoAddedBuiltin': '已自动添加内置仓库',
   'skills.repoAdded': '仓库添加成功',

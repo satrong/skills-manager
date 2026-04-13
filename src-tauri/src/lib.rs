@@ -37,6 +37,8 @@ pub fn run() {
             install::install_skill,
             install::uninstall_skill,
             install::check_junction_exists,
+            // 版本
+            config::get_app_version,
             // 收藏
             config::list_favorites,
             config::add_favorite,

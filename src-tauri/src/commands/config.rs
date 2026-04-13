@@ -2,6 +2,11 @@ use crate::models::{AppConfig, FavoriteEntry};
 use crate::utils::paths;
 use std::fs;
 
+#[tauri::command]
+pub async fn get_app_version() -> Result<String, String> {
+    Ok(env!("CARGO_PKG_VERSION").to_string())
+}
+
 pub(crate) fn load_config_from_disk() -> Result<AppConfig, String> {
     let config_file = paths::config_file()?;
     if !config_file.exists() {

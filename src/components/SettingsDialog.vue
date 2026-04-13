@@ -16,7 +16,17 @@ const { locale, t } = useI18n();
 const selected = ref<ToolType>(defaultToolType.value);
 const projectPathCount = ref<number | null>(null);
 const toolPathCount = ref<number | null>(null);
-const clearing = ref(false);
+const clearing = ref(false)
+const appVersion = ref('')
+
+async function loadVersion() {
+  try {
+    appVersion.value = await invoke<string>('get_app_version')
+  } catch {
+    appVersion.value = ''
+  }
+}
+loadVersion();
 
 const tools = computed<{ value: ToolType; label: string }[]>(() =>
   (Object.entries(TOOL_LABELS) as [ToolType, string][]).map(([value]) => ({ value, label: getToolLabel(value, t('tool.custom')) }))
@@ -92,6 +102,11 @@ function handleSave() {
         >
           {{ clearing ? t('settings.clearing') : t('settings.clearAllPaths') }}
         </button>
+      </div>
+
+      <div class="section version-section" v-if="appVersion">
+        <label>{{ t('settings.version') }}</label>
+        <span class="version-value">v{{ appVersion }}</span>
       </div>
 
       <div class="actions">
@@ -170,4 +185,14 @@ button.primary:hover:not(:disabled) { background: var(--primary-hover); }
 }
 .danger-btn:hover:not(:disabled) { background: var(--danger); color: #fff; }
 .danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.version-section {
+  align-items: center;
+  flex-direction: row !important;
+  justify-content: space-between;
+}
+.version-value {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
 </style>

@@ -91,6 +91,7 @@ const en: Record<TranslationKeys, string> = {
   'settings.langZhCN': '简体中文',
   'settings.langEn': 'English',
   'settings.save': 'Save',
+  'settings.version': 'Version',
 
   'skills.autoAddedBuiltin': 'Built-in repositories added',
   'skills.repoAdded': 'Repository added',
