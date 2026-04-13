@@ -56,25 +56,8 @@ pub fn create_junction(link_path: &Path, target_path: &Path) -> Result<(), Strin
 
     #[cfg(windows)]
     {
-        let output = std::process::Command::new("cmd")
-            .args([
-                "/C",
-                "mklink",
-                "/J",
-                &link_path.to_string_lossy(),
-                &target_path.to_string_lossy(),
-            ])
-            .output()
-            .map_err(|e| format!("执行 mklink 失败: {}", e))?;
-
-        if output.status.success() {
-            Ok(())
-        } else {
-            Err(format!(
-                "创建 Junction 失败: {}",
-                String::from_utf8_lossy(&output.stderr)
-            ))
-        }
+        junction_crate::create(target_path, link_path)
+            .map_err(|e| format!("创建 Junction 失败: {}", e))
     }
 
     #[cfg(not(windows))]
