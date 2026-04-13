@@ -64,6 +64,12 @@ pub async fn add_local_dir(path: String) -> Result<Repo, String> {
     let canonical = dir_path.canonicalize()
         .map_err(|e| format!("无法解析路径: {}", e))?;
 
+    // Windows 的 canonicalize() 会返回 \\?\ 前缀的扩展路径，去除以便显示
+    let canonical = canonical.to_string_lossy()
+        .strip_prefix(r"\\?\")
+        .map(PathBuf::from)
+        .unwrap_or(canonical);
+
     let path_str = canonical.to_string_lossy().to_string();
 
     let mut config = load_config_from_disk()?;
