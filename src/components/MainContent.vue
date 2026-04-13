@@ -154,6 +154,17 @@ watch(
   { immediate: true }
 );
 
+watch(
+  () => props.viewMode,
+  async (mode) => {
+    if (mode === 'favorites') {
+      const repoUrls = [...new Set(favorites.value.map(f => f.repoUrl))]
+      await Promise.all(repoUrls.map(url => loadSkills(url)))
+    }
+  },
+  { immediate: true }
+)
+
 function onDocumentClick() {
   if (openDropdownId.value) openDropdownId.value = null;
 }
