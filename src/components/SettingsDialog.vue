@@ -3,6 +3,8 @@ import { ref, computed } from 'vue';
 import type { ToolType } from '../types';
 import { TOOL_LABELS, getToolLabel } from '../utils/toolPaths';
 import { useSettings } from '../composables/useSettings';
+import { useUpdate } from '../composables/useUpdate';
+import { useToast } from '../composables/useToast';
 import { useI18n } from '../i18n';
 import { invoke } from '@tauri-apps/api/core';
 
@@ -11,6 +13,8 @@ const emit = defineEmits<{
 }>();
 
 const { defaultToolType, setDefaultToolType, clearProjectPaths } = useSettings();
+const { addToast } = useToast();
+const { updateAvailable, latestVersion, checking, checkForUpdate } = useUpdate();
 const { locale, t } = useI18n();
 
 const selected = ref<ToolType>(defaultToolType.value);
@@ -18,6 +22,7 @@ const projectPathCount = ref<number | null>(null);
 const toolPathCount = ref<number | null>(null);
 const clearing = ref(false)
 const appVersion = ref('')
+const checkUpdateText = ref('')
 
 async function loadVersion() {
   try {
@@ -57,6 +62,22 @@ async function handleClearAll() {
     toolPathCount.value = 0;
   } catch { /* ignore */ }
   clearing.value = false;
+}
+
+async function handleCheckUpdate() {
+  checkUpdateText.value = ''
+  try {
+    await checkForUpdate()
+    if (updateAvailable.value) {
+      checkUpdateText.value = t('settings.updateAvailable') + ' v' + latestVersion.value
+    } else {
+      checkUpdateText.value = t('settings.upToDate')
+      addToast(t('settings.upToDate'), 'success')
+    }
+  } catch {
+    checkUpdateText.value = ''
+    addToast(t('settings.updateError'), 'error')
+  }
 }
 
 function handleSave() {
@@ -106,7 +127,20 @@ function handleSave() {
 
       <div class="section version-section" v-if="appVersion">
         <label>{{ t('settings.version') }}</label>
-        <span class="version-value">v{{ appVersion }}</span>
+        <div class="version-right">
+          <span class="version-value">v{{ appVersion }}</span>
+          <button
+            class="check-update-btn"
+            :disabled="checking"
+            @click="handleCheckUpdate"
+          >
+            {{ checking ? t('settings.checking') : t('settings.checkUpdate') }}
+          </button>
+        </div>
+      </div>
+
+      <div v-if="checkUpdateText" class="section">
+        <span class="update-status" :class="{ 'has-update': updateAvailable }">{{ checkUpdateText }}</span>
       </div>
 
       <div class="actions">
@@ -190,9 +224,39 @@ button.primary:hover:not(:disabled) { background: var(--primary-hover); }
   flex-direction: row !important;
   justify-content: space-between;
 }
+.version-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .version-value {
   color: var(--text-secondary);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
+}
+.check-update-btn {
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.check-update-btn:hover:not(:disabled) {
+  background: var(--bg-surface);
+}
+.check-update-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.update-status {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.update-status.has-update {
+  color: var(--primary);
+  font-weight: 500;
 }
 </style>
