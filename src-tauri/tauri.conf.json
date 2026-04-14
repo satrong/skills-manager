@@ -28,7 +28,7 @@
       "endpoints": [
         "https://github.com/satrong/skills-manager/releases/latest/download/latest.json"
       ],
-      "pubkey": ""
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEEwODQyNzQwRDY0MEI0MzAKUldRd3RFRFdRQ2VFb0hUUFNJdzRwOEdpQVB2Zlg5WmxkREt5TVczb1BWTVJqdENsSndzTllyamsK"
     }
   },
   "bundle": {
