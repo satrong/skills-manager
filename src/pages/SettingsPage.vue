@@ -4,18 +4,33 @@ import { useRouter } from 'vue-router'
 import type { ToolType } from '../types'
 import { TOOL_LABELS, getToolLabel } from '../utils/toolPaths'
 import { useSettings } from '../composables/useSettings'
+import { useUpdate } from '../composables/useUpdate'
+import { useToast } from '../composables/useToast'
 import { useI18n } from '../i18n'
 import { invoke } from '@tauri-apps/api/core'
-import { ArrowLeft, Wrench, History, Globe } from 'lucide-vue-next'
+import { ArrowLeft, Wrench, History, Globe, RefreshCw } from 'lucide-vue-next'
 
 const router = useRouter()
 
 const { defaultToolType, setDefaultToolType, clearProjectPaths } = useSettings()
+const { updateAvailable, latestVersion, checking, checkForUpdate } = useUpdate()
+const { addToast } = useToast()
 const { locale, t } = useI18n()
 
 const projectPathCount = ref<number | null>(null)
 const toolPathCount = ref<number | null>(null)
 const clearing = ref(false)
+const appVersion = ref('')
+const checkUpdateText = ref('')
+
+async function loadVersion() {
+  try {
+    appVersion.value = await invoke<string>('get_app_version')
+  } catch {
+    appVersion.value = ''
+  }
+}
+loadVersion()
 
 const tools = computed<{ value: ToolType; label: string }[]>(() =>
   (Object.entries(TOOL_LABELS) as [ToolType, string][]).map(([value]) => ({ value, label: getToolLabel(value, t('tool.custom')) }))
@@ -50,6 +65,22 @@ async function handleClearAll() {
     toolPathCount.value = 0
   } catch { /* ignore */ }
   clearing.value = false
+}
+
+async function handleCheckUpdate() {
+  checkUpdateText.value = ''
+  try {
+    await checkForUpdate()
+    if (updateAvailable.value) {
+      checkUpdateText.value = t('settings.updateAvailable') + ' v' + latestVersion.value
+    } else {
+      checkUpdateText.value = t('settings.upToDate')
+      addToast(t('settings.upToDate'), 'success')
+    }
+  } catch {
+    checkUpdateText.value = ''
+    addToast(t('settings.updateError'), 'error')
+  }
 }
 </script>
 
@@ -109,6 +140,26 @@ async function handleClearAll() {
           >
             {{ clearing ? t('settings.clearing') : t('settings.clearAllPaths') }}
           </button>
+        </div>
+      </div>
+
+      <div class="settings-card" v-if="appVersion">
+        <div class="card-icon-wrap">
+          <RefreshCw :size="18" class="card-icon" />
+        </div>
+        <div class="card-content">
+          <label>{{ t('settings.version') }}</label>
+          <div class="version-row">
+            <span class="version-value">v{{ appVersion }}</span>
+            <button
+              class="check-update-btn"
+              :disabled="checking"
+              @click="handleCheckUpdate"
+            >
+              {{ checking ? t('settings.checking') : t('settings.checkUpdate') }}
+            </button>
+          </div>
+          <span v-if="checkUpdateText" class="update-status" :class="{ 'has-update': updateAvailable }">{{ checkUpdateText }}</span>
         </div>
       </div>
     </div>
@@ -258,4 +309,39 @@ select:focus {
 }
 .danger-btn:hover:not(:disabled) { background: var(--danger); color: #fff; }
 .danger-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.version-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.version-value {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.check-update-btn {
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.check-update-btn:hover:not(:disabled) {
+  background: var(--bg-surface);
+}
+.check-update-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.update-status {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.update-status.has-update {
+  color: var(--primary);
+  font-weight: 500;
+}
 </style>
