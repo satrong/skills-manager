@@ -40,6 +40,11 @@
       "globalPath": ".trae/skills",
       "projectDir": ".trae/skills"
     },
+    "trae-cn": {
+      "label": "Trae CN",
+      "globalPath": ".trae-cn/skills",
+      "projectDir": ".trae-cn/skills"
+    },
     "custom": {
       "label": "Custom"
     }
