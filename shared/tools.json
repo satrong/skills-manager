@@ -18,7 +18,7 @@
     "cursor": {
       "label": "Cursor",
       "globalPath": ".cursor/skills",
-      "projectDir": ".cursor/rules"
+      "projectDir": ".cursor/skills"
     },
     "kilo": {
       "label": "Kilo",
