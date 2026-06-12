@@ -39,10 +39,10 @@ fn parse_skills_from_repo(repo_dir: &Path, repo_url: &str) -> Vec<Skill> {
     dedup_skills_by_name(skills)
 }
 
-/// 解析内容前 10 行的 frontmatter
+/// 解析文件开头的 frontmatter
 /// 格式: `---` 包裹的 YAML 键值对，要求包含必填的 name 和 description
 fn parse_frontmatter(content: &str) -> Option<HashMap<String, String>> {
-    let lines: Vec<&str> = content.lines().take(10).collect();
+    let lines: Vec<&str> = content.lines().collect();
 
     if lines.is_empty() || lines[0].trim() != "---" {
         return None;
@@ -52,14 +52,45 @@ fn parse_frontmatter(content: &str) -> Option<HashMap<String, String>> {
     let end = lines[1..].iter().position(|l| l.trim() == "---")?;
 
     let mut fields = HashMap::new();
-    for line in &lines[1..end + 1] {
+    let frontmatter = &lines[1..end + 1];
+    let mut i = 0;
+    while i < frontmatter.len() {
+        let line = frontmatter[i];
         if let Some((key, value)) = line.split_once(':') {
             let key = key.trim().to_string();
-            let value = value.trim().to_string();
             if !key.is_empty() {
-                fields.insert(key, value);
+                let value = value.trim();
+                if matches!(value, "|" | "|-" | "|+" | ">" | ">-" | ">+") {
+                    let folded = value.starts_with('>');
+                    let mut block_lines = Vec::new();
+                    i += 1;
+
+                    while i < frontmatter.len() {
+                        let block_line = frontmatter[i];
+                        if !block_line.trim().is_empty()
+                            && !block_line.starts_with(' ')
+                            && !block_line.starts_with('\t')
+                        {
+                            break;
+                        }
+
+                        block_lines.push(block_line.trim_start());
+                        i += 1;
+                    }
+
+                    let value = if folded {
+                        block_lines.join(" ")
+                    } else {
+                        block_lines.join("\n")
+                    };
+                    fields.insert(key, value.trim().to_string());
+                    continue;
+                }
+
+                fields.insert(key, value.to_string());
             }
         }
+        i += 1;
     }
 
     // 必须包含 name 和 description
@@ -199,4 +230,28 @@ pub async fn search_skills(query: String) -> Result<Vec<SearchResult>, String> {
     }
 
     Ok(results)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_frontmatter_reads_block_description() {
+        let content = r#"---
+name: joeseesun-qiaomu-goal-meta-skill
+description: |
+  当 SKILL.md 使用多行描述时，也应该提取真实描述。
+---
+
+# Goal Meta Skill
+"#;
+
+        let fields = parse_frontmatter(content).expect("应该解析 frontmatter");
+
+        assert_eq!(
+            fields.get("description").map(String::as_str),
+            Some("当 SKILL.md 使用多行描述时，也应该提取真实描述。")
+        );
+    }
 }
