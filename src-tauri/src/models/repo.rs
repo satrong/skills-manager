@@ -40,6 +40,28 @@ pub struct FavoriteEntry {
     pub repo_url: String,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProxyConfig {
+    pub enabled: bool,
+    pub url: String,
+}
+
+impl ProxyConfig {
+    /// 返回实际生效的代理地址；未启用或地址为空时返回 None
+    pub fn effective(&self) -> Option<&str> {
+        if !self.enabled {
+            return None;
+        }
+        let url = self.url.trim();
+        if url.is_empty() {
+            None
+        } else {
+            Some(url)
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppConfig {
@@ -53,6 +75,8 @@ pub struct AppConfig {
     pub default_tool_type: Option<String>,
     #[serde(default)]
     pub favorites: Vec<FavoriteEntry>,
+    #[serde(default)]
+    pub proxy: ProxyConfig,
 }
 
 impl Default for AppConfig {
@@ -63,6 +87,7 @@ impl Default for AppConfig {
             project_paths: vec![],
             default_tool_type: Some("claude-code".to_string()),
             favorites: vec![],
+            proxy: ProxyConfig::default(),
         }
     }
 }

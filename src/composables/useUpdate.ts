@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { check, type Update } from '@tauri-apps/plugin-updater'
+import { useSettings } from './useSettings'
 
 const updateAvailable = ref(false)
 const latestVersion = ref('')
@@ -16,7 +17,7 @@ async function checkForUpdate() {
   checking.value = true
   error.value = ''
   try {
-    const update = await check()
+    const update = await check({ proxy: useSettings().effectiveProxy.value })
     if (update) {
       updateAvailable.value = true
       latestVersion.value = update.version

@@ -8,11 +8,11 @@ import { useUpdate } from '../composables/useUpdate'
 import { useToast } from '../composables/useToast'
 import { useI18n } from '../i18n'
 import { invoke } from '@tauri-apps/api/core'
-import { ArrowLeft, Wrench, History, Globe, RefreshCw } from 'lucide-vue-next'
+import { ArrowLeft, Wrench, History, Globe, Network, RefreshCw } from 'lucide-vue-next'
 
 const router = useRouter()
 
-const { defaultToolType, setDefaultToolType, clearProjectPaths } = useSettings()
+const { defaultToolType, setDefaultToolType, clearProjectPaths, proxyEnabled, proxyUrl, setProxyConfig } = useSettings()
 const { updateAvailable, latestVersion, checking, checkForUpdate } = useUpdate()
 const { addToast } = useToast()
 const { locale, t } = useI18n()
@@ -65,6 +65,14 @@ async function handleClearAll() {
     toolPathCount.value = 0
   } catch { /* ignore */ }
   clearing.value = false
+}
+
+async function handleProxyChange() {
+  try {
+    await setProxyConfig(proxyEnabled.value, proxyUrl.value)
+  } catch {
+    addToast(t('settings.proxySaveError'), 'error')
+  }
 }
 
 async function handleCheckUpdate() {
@@ -121,6 +129,29 @@ async function handleCheckUpdate() {
               {{ tool.label }}
             </option>
           </select>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-icon-wrap">
+          <Network :size="18" class="card-icon" />
+        </div>
+        <div class="card-content">
+          <label>{{ t('settings.proxy') }}</label>
+          <p class="desc">{{ t('settings.proxyDesc') }}</p>
+          <label class="switch-row">
+            <input type="checkbox" v-model="proxyEnabled" @change="handleProxyChange" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <span class="switch-label">{{ t('settings.proxyEnable') }}</span>
+          </label>
+          <input
+            class="text-input"
+            type="text"
+            v-model="proxyUrl"
+            :disabled="!proxyEnabled"
+            :placeholder="t('settings.proxyUrlPlaceholder')"
+            @change="handleProxyChange"
+          />
         </div>
       </div>
 
@@ -295,6 +326,68 @@ select {
 select:focus {
   border-color: var(--primary);
   outline: none;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  cursor: pointer;
+}
+.switch-row input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--border-strong);
+  transition: background 0.15s;
+}
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.switch-row input:checked + .switch-track {
+  background: var(--primary);
+}
+.switch-row input:checked + .switch-track .switch-thumb {
+  transform: translateX(14px);
+}
+.switch-label {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+.text-input {
+  margin-top: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+.text-input:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+.text-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .danger-btn {
   align-self: flex-start;

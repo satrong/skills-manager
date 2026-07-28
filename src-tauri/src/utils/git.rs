@@ -7,8 +7,21 @@ use std::os::windows::process::CommandExt;
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
 
+/// 生成代理相关的 git 配置参数，需放在子命令之前
+fn proxy_args(proxy: Option<&str>) -> Vec<String> {
+    match proxy {
+        Some(url) => vec![
+            "-c".to_string(),
+            format!("http.proxy={}", url),
+            "-c".to_string(),
+            format!("https.proxy={}", url),
+        ],
+        None => vec![],
+    }
+}
+
 /// 克隆仓库到指定目录
-pub fn clone_repo(url: &str, target_dir: &Path) -> Result<(), String> {
+pub fn clone_repo(url: &str, target_dir: &Path, proxy: Option<&str>) -> Result<(), String> {
     if target_dir.exists() {
         return Err(format!("目录已存在: {}", target_dir.display()));
     }
@@ -16,6 +29,7 @@ pub fn clone_repo(url: &str, target_dir: &Path) -> Result<(), String> {
     std::fs::create_dir_all(parent).map_err(|e| format!("创建目录失败: {}", e))?;
 
     let mut cmd = Command::new("git");
+    cmd.args(proxy_args(proxy));
     cmd.args(["clone", url, &target_dir.to_string_lossy()]);
     #[cfg(target_os = "windows")]
     cmd.creation_flags(CREATE_NO_WINDOW);
@@ -35,11 +49,12 @@ pub fn clone_repo(url: &str, target_dir: &Path) -> Result<(), String> {
 }
 
 /// 在已有仓库目录执行 git pull
-pub fn pull_repo(repo_dir: &Path) -> Result<String, String> {
+pub fn pull_repo(repo_dir: &Path, proxy: Option<&str>) -> Result<String, String> {
     if !repo_dir.exists() {
         return Err(format!("仓库目录不存在: {}", repo_dir.display()));
     }
     let mut cmd = Command::new("git");
+    cmd.args(proxy_args(proxy));
     cmd.args(["pull"]).current_dir(repo_dir);
     #[cfg(target_os = "windows")]
     cmd.creation_flags(CREATE_NO_WINDOW);

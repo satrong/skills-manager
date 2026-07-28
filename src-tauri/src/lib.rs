@@ -23,6 +23,8 @@ pub fn run() {
             config::set_default_tool_type,
             config::clear_project_paths,
             config::clear_tool_paths,
+            config::get_proxy_config,
+            config::set_proxy_config,
             // 仓库
             repo::add_repo,
             repo::add_local_dir,

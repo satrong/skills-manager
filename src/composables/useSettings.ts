@@ -1,10 +1,18 @@
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
-import type { ToolType } from '../types';
+import type { ProxyConfig, ToolType } from '../types';
 
 const defaultToolType = ref<ToolType>('claude-code');
 const projectPaths = ref<string[]>([]);
+const proxyEnabled = ref(false);
+const proxyUrl = ref('');
 let loaded = false;
+
+// 实际生效的代理地址，未启用或为空时为 undefined
+const effectiveProxy = computed(() => {
+  const url = proxyUrl.value.trim();
+  return proxyEnabled.value && url ? url : undefined;
+});
 
 async function loadSettings() {
   if (loaded) return;
@@ -16,6 +24,25 @@ async function loadSettings() {
     defaultToolType.value = 'claude-code';
   }
   await loadProjectPaths();
+  await loadProxyConfig();
+}
+
+async function loadProxyConfig() {
+  try {
+    const config = await invoke<ProxyConfig>('get_proxy_config');
+    proxyEnabled.value = config.enabled;
+    proxyUrl.value = config.url;
+  } catch {
+    proxyEnabled.value = false;
+    proxyUrl.value = '';
+  }
+}
+
+async function setProxyConfig(enabled: boolean, url: string) {
+  const trimmed = url.trim();
+  await invoke('set_proxy_config', { enabled, url: trimmed });
+  proxyEnabled.value = enabled;
+  proxyUrl.value = trimmed;
 }
 
 async function loadProjectPaths() {
@@ -50,6 +77,10 @@ export function useSettings() {
   return {
     defaultToolType,
     projectPaths,
+    proxyEnabled,
+    proxyUrl,
+    effectiveProxy,
+    setProxyConfig,
     loadSettings,
     setDefaultToolType,
     loadProjectPaths,

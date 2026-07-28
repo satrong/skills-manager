@@ -37,11 +37,17 @@ export interface FavoriteEntry {
   repoUrl: string;
 }
 
+export interface ProxyConfig {
+  enabled: boolean;
+  url: string;
+}
+
 export interface AppConfig {
   repos: Omit<Repo, 'skills'>[];
   toolPaths: Partial<Record<ToolType, string>>;
   defaultToolType?: ToolType | null;
   favorites: FavoriteEntry[];
+  proxy: ProxyConfig;
 }
 
 export interface SearchResult {

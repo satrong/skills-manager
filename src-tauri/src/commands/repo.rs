@@ -35,7 +35,7 @@ pub async fn add_repo(url: String) -> Result<Repo, String> {
     let repos_dir = paths::repos_dir()?;
     let local_path = repos_dir.join(&dir_name);
 
-    git::clone_repo(&url, &local_path)?;
+    git::clone_repo(&url, &local_path, config.proxy.effective())?;
 
     let repo = Repo {
         url: url.clone(),
@@ -126,6 +126,7 @@ pub async fn remove_repo(url: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn update_repo(url: String) -> Result<String, String> {
     let mut config = load_config_from_disk()?;
+    let proxy = config.proxy.effective().map(|s| s.to_string());
 
     let repo = config.repos.iter_mut()
         .find(|r| r.url == url)
@@ -140,7 +141,7 @@ pub async fn update_repo(url: String) -> Result<String, String> {
         return Ok("本地目录已刷新".to_string());
     }
 
-    let result = git::pull_repo(&repo.local_path)?;
+    let result = git::pull_repo(&repo.local_path, proxy.as_deref())?;
     repo.last_update = now_timestamp();
 
     save_config_to_disk(&config)?;
@@ -151,6 +152,7 @@ pub async fn update_repo(url: String) -> Result<String, String> {
 #[tauri::command]
 pub async fn update_all_repos() -> Result<Vec<String>, String> {
     let mut config = load_config_from_disk()?;
+    let proxy = config.proxy.effective().map(|s| s.to_string());
     let mut results = vec![];
 
     for repo in config.repos.iter_mut() {
@@ -163,7 +165,7 @@ pub async fn update_all_repos() -> Result<Vec<String>, String> {
             }
             continue;
         }
-        match git::pull_repo(&repo.local_path) {
+        match git::pull_repo(&repo.local_path, proxy.as_deref()) {
             Ok(msg) => {
                 repo.last_update = now_timestamp();
                 results.push(format!("{}: {}", repo.name, msg.trim()));
@@ -206,13 +208,14 @@ pub async fn ensure_builtin_repos() -> Result<Vec<Repo>, String> {
     }
 
     let repos_dir = paths::repos_dir()?;
+    let proxy = config.proxy.effective().map(|s| s.to_string());
     let mut added = Vec::new();
 
     for url in BUILTIN_REPO_URLS {
         let dir_name = paths::repo_dir_name(url)?;
         let local_path = repos_dir.join(&dir_name);
 
-        match git::clone_repo(url, &local_path) {
+        match git::clone_repo(url, &local_path, proxy.as_deref()) {
             Ok(()) => {},
             Err(e) => {
                 eprintln!("克隆内置仓库 {} 失败: {}", url, e);

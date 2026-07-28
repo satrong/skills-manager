@@ -90,6 +90,11 @@ const zhCN = {
   'settings.langEn': 'English',
   'settings.save': '保存',
   'settings.version': '版本',
+  'settings.proxy': '网络代理',
+  'settings.proxyDesc': '用于克隆/更新仓库和检查应用更新，支持 HTTP 与 SOCKS5 代理。',
+  'settings.proxyEnable': '启用代理',
+  'settings.proxyUrlPlaceholder': '例: http://127.0.0.1:7890 或 socks5://127.0.0.1:1080',
+  'settings.proxySaveError': '保存代理配置失败',
 
   'settings.checkUpdate': '检查更新',
   'settings.checking': '检查中...',

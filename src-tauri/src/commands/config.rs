@@ -1,4 +1,4 @@
-use crate::models::{AppConfig, FavoriteEntry};
+use crate::models::{AppConfig, FavoriteEntry, ProxyConfig};
 use crate::utils::paths;
 use std::fs;
 
@@ -104,6 +104,22 @@ pub async fn clear_project_paths() -> Result<(), String> {
 pub async fn clear_tool_paths() -> Result<(), String> {
     let mut config = load_config_from_disk()?;
     config.tool_paths.clear();
+    save_config_to_disk(&config)
+}
+
+#[tauri::command]
+pub async fn get_proxy_config() -> Result<ProxyConfig, String> {
+    let config = load_config_from_disk()?;
+    Ok(config.proxy)
+}
+
+#[tauri::command]
+pub async fn set_proxy_config(enabled: bool, url: String) -> Result<(), String> {
+    let mut config = load_config_from_disk()?;
+    config.proxy = ProxyConfig {
+        enabled,
+        url: url.trim().to_string(),
+    };
     save_config_to_disk(&config)
 }
 

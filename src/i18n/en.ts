@@ -92,6 +92,11 @@ const en: Record<TranslationKeys, string> = {
   'settings.langEn': 'English',
   'settings.save': 'Save',
   'settings.version': 'Version',
+  'settings.proxy': 'Network proxy',
+  'settings.proxyDesc': 'Used for cloning/updating repositories and checking app updates. Supports HTTP and SOCKS5 proxies.',
+  'settings.proxyEnable': 'Enable proxy',
+  'settings.proxyUrlPlaceholder': 'e.g. http://127.0.0.1:7890 or socks5://127.0.0.1:1080',
+  'settings.proxySaveError': 'Failed to save proxy settings',
 
   'settings.checkUpdate': 'Check for updates',
   'settings.checking': 'Checking...',
